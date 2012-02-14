@@ -1,0 +1,7 @@
+#Проверка модулей
+
+##В браузере
+http://kruglova.localhost:3000/infra/plugins/infrajs/test/
+
+##В node.js
+Набрать make test находясь на одном уровне с папкой test.
