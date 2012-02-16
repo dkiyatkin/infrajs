@@ -19,7 +19,7 @@
 			if (!index.splice) {
 				_compileObj(index);
 			} else {
-				for (var i = index.length; --i >= 0;) {
+				var i; for (i = index.length; --i >= 0;) {
 					_compileObj(index[i]);
 				}
 			}
@@ -27,10 +27,10 @@
 		};
 		var _compileObj = function(index) {
 			var layer = {}; // самый первый слой
-			for (var prop in index) if (index.hasOwnProperty(prop)) {
+			var prop; for (prop in index) { if (index.hasOwnProperty(prop)) {
 				infra.emit('compile', layer, prop, index[prop]);
-			}
-		}
+			}}
+		};
 		var setCircle = function() {
 			infra.log.debug('first circle');
 			infra.circle = {
@@ -41,20 +41,24 @@
 				last: false, // последний раз
 				loading: 0, // счетчик ассинхронных загрузок
 				state: infra.state
-			}
-		}
+			};
+		};
 		var _compile = function(cb) {
 			// Если слоев нету в памяти, то собрать их, используя index
 			if (!infra.layers.length) {
 				infra.compile(infra.index, function() {
 					cb();
 				});
-			} else cb();
-		}
+			} else {
+				cb();
+			}
+		};
 		var _check = function(cb) {
-			if (!infra.layers.length) infra.log.info('empty layers');
+			if (!infra.layers.length) {
+				infra.log.info('empty layers');
+			}
 			setTimeout(function() {
-				for (var i = infra.layers.length; --i >= 0;) { // если слой пустой, сюда даже не заходит
+				var i; for (i = infra.layers.length; --i >= 0;) { // если слой пустой, сюда даже не заходит
 					infra.circle.num = i;
 					infra.emit('layer', infra.layers[i], i, infra.layers.length);
 				}
@@ -66,7 +70,7 @@
 					infra.circle.loading = 0;
 					infra.circle.last = true;
 				}
-				if (infra.circle.loading == 0) {
+				if (infra.circle.loading === 0) {
 					if (infra.circle.last) {
 						infra.circle.last = false;
 						infra.emit('end', cb);
@@ -107,28 +111,32 @@
 						}
 						setCircle();
 						infra.circle.timeout = timeout;
-						if (!infra.circle.timeout) infra.circle.timeout = 1;
+						if (!infra.circle.timeout) {
+							infra.circle.timeout = 1;
+						}
 						_check(cb);
 					}
 				} else { // отпустить загрузки.. запустить чек, позже, насколько позволяет очередь, убирать из очереди старые обработчики
 					infra.circle.interrupt = true;
 					infra.once('queue', function() {
 						infra.check(cb);
-					})
+					});
 					var listeners = infra.listeners('queue');
-					listeners.splice(0, listeners.length - queue)
+					listeners.splice(0, listeners.length - queue);
 				}
-			})
-		}
+			});
+		};
 		infra.on('end', function(cb) {
 			var queue = function() {
 				_process = false;
+			};
+			if (typeof(cb) === 'function') {
+				cb(queue.bind(infra));
+			} else {
+				queue.call(infra);
 			}
-			if (typeof(cb) === 'function') cb(queue.bind(infra));
-			else queue.call(infra);
-		})
-	}
-if (typeof(window) != 'undefined')
-	Infra.ext(setCheck)
-if (typeof(window) == 'undefined') module.exports = setCheck
+		});
+	};
+if (typeof(window) != 'undefined') { Infra.ext(setCheck); }
+if (typeof(window) == 'undefined') { module.exports = setCheck; }
 })();

@@ -14,4 +14,4 @@ exports.test_logger = function(test) {
 	infra.log.logger = 'INFO';
 	test.equal(infra.log.info('logger', 'sdf').split(' ').slice(-3).join(' '), 'INFO logger sdf', 'logger level 2');
 	test.done();
-}
+};

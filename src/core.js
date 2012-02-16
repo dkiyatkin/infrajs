@@ -21,12 +21,12 @@ var Infra = {
 					// Откомпилировать слой, считать статусы
 					return {
 						layers: [] // готовые слои
-					}
+					};
 				} else {
-					throw 'HTML5 History API not supported'
+					throw 'HTML5 History API not supported';
 				}
 			} else {
-				throw 'Array indexOf not supported'
+				throw 'Array indexOf not supported';
 			}
 		//}
 	},
@@ -52,7 +52,7 @@ var Infra = {
 			cb.apply(infra, arguments);
 			//infra.constructor = arguments.callee;
 			return infra;
-		}
+		};
 	}
 };
-if (typeof(window) == 'undefined') { Infra.init = function() { return { layers: [] } }; module.exports = Infra; }
+if (typeof(window) == 'undefined') { Infra.init = function() { return { layers: [] }; }; module.exports = Infra; }

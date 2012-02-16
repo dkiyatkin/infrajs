@@ -12,6 +12,7 @@ if (typeof(window) == 'undefined') {
 
 exports.test_many_check = function(test) {
 	var infra = Infra.init();
+	infra.index = {};
 	var a = 0;
 	var last = false;
 	test.expect(2);
@@ -37,7 +38,7 @@ exports.test_many_check = function(test) {
 	});
 	infra.check(function(cb) {
 		a++;
-		test.strictEqual(a, 2, 'last')
+		test.strictEqual(a, 2, 'last');
 		test.done();
 		cb();
 	});
@@ -45,30 +46,33 @@ exports.test_many_check = function(test) {
 
 exports.test_wait_check = function(test) {
 	var infra = Infra.init();
+	infra.index = {};
 	var a = 0;
 	test.expect(4);
 	infra.on('start', function() {
 		test.ok(true, 'start');
-	})
+	});
 	infra.on('end', function() {
 		a++;
-		if (a == 2) test.done();
-	})
+		if (a == 2) {
+			test.done();
+		}
+	});
 	infra.check(true);
 	infra.check(function(cb) {
 		test.ok(true, 'resume');
-		cb()
+		cb();
 	});
 	infra.check(function(cb) {
 		test.ok(false, 'queue1');
-		cb()
+		cb();
 	});
 	infra.check(function(cb) {
 		test.ok(false, 'queue2');
-		cb()
+		cb();
 	});
 	infra.check(function(cb) {
 		test.ok(true, 'queue3');
-		cb()
+		cb();
 	});
-}
+};

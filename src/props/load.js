@@ -17,7 +17,9 @@
 					_loading[path] = true;
 					infra.load._load(path, function(err, ans) {
 						infra.load.cache.text[path] = ans;
-						if (err) infra.log.error('error load ' + path);
+						if (err) {
+							infra.log.error('error load ' + path);
+						}
 						_loading[path] = false;
 						infra.emit('load: ' + path, err);
 						cb(err, infra.load.cache.text[path]);
@@ -26,12 +28,12 @@
 					infra.log.debug('add load queue for ' + path);
 					infra.once('load: ' + path, function(err) {
 						cb(err, infra.load.cache.text[path]);
-					})
+					});
 				}
 			} else {
-				cb(0, infra.load.cache.text[path])
+				cb(0, infra.load.cache.text[path]);
 			}
-		}
+		};
 
 /*
  * Загружает переданный путь как текст, не используя кэширование.
@@ -43,7 +45,7 @@
  * @param {Boolean} json Ключ для получения json ответа.
  */
 		infra.load._load = function(path, cb, json) {
-			if(typeof(path)!=='string')cb(0, null);
+			if (typeof(path)!=='string') { cb(0, null); }
 			function createRequestObject() {
 				if (typeof XMLHttpRequest === 'undefined') {
 					XMLHttpRequest = function() {
@@ -76,9 +78,9 @@
 						cb(0, null);
 					}
 				}
-			}
+			};
 			req.send(null);
-		}
+		};
 
 /*
  * Загружает переданный путь как JSON-объект, если он уже загружен то будет получен кэшированный ответ.
@@ -87,26 +89,26 @@
  * @param {Function} callback Callback функция, первый агрумент содержит ошибку запроса, второй JSON-объект полученных данных с сервера.
  */
 		infra.load.json = function(path, cb) {
-			if (!infra.load.cache.json[path]) {
+			if (!infra.load.cache.data[path]) {
 				infra.load(path, function(err, json) {
 					try {
-						infra.load.cache.json[path] = JSON.parse(json);
+						infra.load.cache.data[path] = JSON.parse(json);
 					} catch (e) {
 						infra.log.error('wrong json data ' + path);
 					}
-					cb(err, infra.load.cache.json[path])
-				}, true)
+					cb(err, infra.load.cache.data[path]);
+				}, true);
 			} else {
-				cb(0, infra.load.cache.json[path])
+				cb(0, infra.load.cache.data[path]);
 			}
-		}
+		};
 
 		// Выполнить js
 		var globalEval = function(data) {
-			if (!data) return;
+			if (!data) { return; }
 			// Inspired by code by Andrea Giammarchi
 			// http://webreflection.blogspot.com/2007/08/global-scope-evaluation-and-dom.html
-			if ((infra.browser.IE==false) && (infra.browser.safari==false)) {
+			if ((infra.browser.IE===false) && (infra.browser.safari===false)) {
 				window.eval(data);
 			} else if (!infra.browser) {
 				eval(data);
@@ -117,7 +119,7 @@
 				head.insertBefore(script, head.firstChild);
 				head.removeChild(script);
 			}
-		}
+		};
 
 		// Реализация кросс-доменного запроса
 		var setXDR = function(path) {
@@ -127,7 +129,7 @@
 			script.src = path;
 			head.insertBefore(script, head.firstChild);
 			head.removeChild(script);
-		}
+		};
 
 /*
  * Загружает переданный путь и выполняет его как javascript-код, если он уже загружен то будет выполнен повторно.
@@ -145,19 +147,20 @@
 				cb(0);
 			} else {
 				infra.load(path, function(err, ans) {
-					if (err) cb(err);
-					else {
+					if (err) {
+						cb(err);
+					} else {
 						try {
 							globalEval(ans); // <-
 							cb(0);
 						} catch (e) {
 							infra.log.error('wrong js ' + path);
-							cb(e)
+							cb(e);
 						}
 					}
-				})
+				});
 			}
-		}
+		};
 		infra.load.exec = infra.load.js;
 
 		var busy = false;
@@ -186,7 +189,7 @@
 				}
 				busy = false;
 			}
-		}
+		};
 
 /*
  * Вставляет стили на страницу и применяет их.
@@ -194,7 +197,7 @@
  * @param {String} code Код css для вставки в документ.
  */
 		infra.load.styles = function(code) {
-			if (infra.load.cache.style[code]) return; //Почему-то если это убрать после нескольких перепарсиваний стили у слоя слетают..
+			if (infra.load.cache.style[code]) { return; } //Почему-то если это убрать после нескольких перепарсиваний стили у слоя слетают..
 			infra.load.cache.style[code] = true;
 			var style = document.createElement('style'); //создани style с css
 			style.type = "text/css";
@@ -205,7 +208,7 @@
 			}
 			var head = document.getElementsByTagName("head")[0] || document.documentElement;
 			head.insertBefore(style, head.lastChild); //добавили css на страницу
-		}
+		};
 
 /*
  * Объект хранит кэш-данные.
@@ -213,18 +216,19 @@
  * Примеры:
  *		infra.load.cache.style['css-code'] // если true, то указанный css-код применился.
  *		infra.load.cache.text['path/to/file'] // возвращает загруженный текст по указанному пути.
- *		infra.load.cache.json['path/to/file'] // возвращает json объект, полученный из текста по указанному пути.
+ *		infra.load.cache.data['path/to/file'] // возвращает объект, полученный из текста по указанному пути.
  */
 		infra.load.cache = {
-			style: {}, json: {}, text: {}
-		}
+			style: {}, data: {}, text: {}
+		};
 
 		// Очистка кэша по регекспу
 		var _clearRegCache = function(clean, obj) {
-			for (var key in obj) if (obj.hasOwnProperty(key)) {
-				if (clean.test(key)) delete(obj[key]);
-			}
-		}
+			var key;
+			for (key in obj) { if (obj.hasOwnProperty(key)) {
+				if (clean.test(key)) { delete(obj[key]); }
+			}}
+		};
 /*
  * Очищает кэш в зависимости от переданного параметра.
  *
@@ -232,18 +236,17 @@
  */
 		infra.load.clearCache = function(clean) {
 			if (typeof(clean) == 'undefined') {
-				infra.load.cache.json = {};
+				infra.load.cache.data = {};
 				infra.load.cache.text = {};
 			} else if (clean.constructor == RegExp) {
-				_clearRegCache(clean, infra.load.cache.json);
+				_clearRegCache(clean, infra.load.cache.data);
 				_clearRegCache(clean, infra.load.cache.text);
 			} else {
-				delete(infra.load.cache.json[clean]);
+				delete(infra.load.cache.data[clean]);
 				delete(infra.load.cache.text[clean]);
 			}
-		}
-	}
-if (typeof(window) != 'undefined')
-	Infra.ext(load)
-if (typeof(window) == 'undefined') module.exports = load
+		};
+	};
+if (typeof(window) != 'undefined') { Infra.ext(load); }
+if (typeof(window) == 'undefined') { module.exports = load; }
 })();

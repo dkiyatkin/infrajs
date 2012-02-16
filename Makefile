@@ -47,9 +47,4 @@ ${DIST_DIR}:
 	@@mkdir -p ${DIST_DIR}
 
 infra: ${DIST_DIR}
-	@@cat ${FILES} | \
-		sed "/^if (typeof(window) .= .undefined.).*/d" > ${INFRA};
-#sed 's/(function(Infra) {//' | \
-#sed "/^if (typeof(window) == .undefined.).*/d" | \
-#sed 's/})(Infra);//'
-
+	@@cat ${FILES} > ${INFRA}

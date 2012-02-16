@@ -10,21 +10,21 @@ if (typeof(window) == 'undefined') {
 exports.test_init = function(test) {
 	var infra = Infra.init();
 	test.expect(1);
-	test.strictEqual(infra.layers.length, 0, 'infra.layers')
+	test.strictEqual(infra.layers.length, 0, 'infra.layers');
 	test.done();
 };
 
 exports.test_ext = function(test){
 	Infra.ext(function() {
 		var a = 1;
-		var func_a = function() {}
+		var func_a = function() {};
 		this.test_value = 2;
-	})
+	});
 	Infra.ext(function() {
 		this.testFunction = function() {
 			return this.test_value + 1;
-		}
-	})
+		};
+	});
 	var infra = Infra.init();
 	test.expect(4);
 	test.strictEqual(infra.a, undefined, 'no ext value');
@@ -35,6 +35,9 @@ exports.test_ext = function(test){
 };
 
 exports.many_init = function(test) {
+	test.expect(1);
 	var infra = Infra.init();
+	var infra2 = Infra.init();
+	test.ok(infra != infra2, 'new obj');
 	test.done();
 };

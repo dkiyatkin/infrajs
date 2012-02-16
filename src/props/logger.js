@@ -2,19 +2,25 @@
 var Logger = function() {
 	var loggers = ['ERROR', 'WARNING', 'INFO', 'DEBUG'];
 	var _log = function(messages, level, logger, quiet) {
-		var message;
-		for (var i in messages) if (messages.hasOwnProperty(i)) {
-			if (!message) message = messages[i];
-			else message = message + ' ' + messages[i]
-		}
-		for (var l = loggers.length; --l >= level;) {
+		var i, message;
+		for (i in messages) { if (messages.hasOwnProperty(i)) {
+			if (!message) {
+				message = messages[i];
+			} else {
+				message = message + ' ' + messages[i];
+			}
+		}}
+		var l;
+		for (l = loggers.length; --l >= level;) {
 			if (loggers[l] == logger) {
 				var msg = '[' + new Date().toGMTString() + '] ' + loggers[level] + ' ' + message;
-				if (!quiet) console.log(msg);
-				return msg
+				if (!quiet) {
+					console.log(msg);
+				}
+				return msg;
 			}
 		}
-	}
+	};
 	return {
 		quiet: false,
 		logger: 'WARNING',
@@ -30,8 +36,8 @@ var Logger = function() {
 		error: function() {
 			return _log(arguments, 0, this.logger, this.quiet);
 		}
-	}
-}
+	};
+};
 var newLogger = function() {
 	var infra = this;
 /*
@@ -47,8 +53,11 @@ var newLogger = function() {
  *		infra.log.debug('test debug'); // ничего не произойдет, потому что логгер задан уровнем выше
  */
 	infra.log = Logger();
-}
-if (typeof(window) != 'undefined')
+};
+if (typeof(window) !== 'undefined') {
 	Infra.ext(newLogger);
-if (typeof(window) == 'undefined') module.exports = newLogger
+}
+if (typeof(window) === 'undefined') {
+	module.exports = newLogger;
+}
 })();
