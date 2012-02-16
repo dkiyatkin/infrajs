@@ -2,14 +2,14 @@ window.exports = {};
 window.layer = exports;
 
 exports.test_layer = function(test) {
-	var infra = Infra.init()
+	var infra = Infra.init();
 	infra.index = {
 		html: '<div id="base_text"></div>',
 		tag: '#base_html',
 		tags: {
 			'#base_text': { // здесь будет добавлен слэш
 				html: '<div id="base_left"></div>',
-				childs: {
+				states: {
 					'Страницы': {
 						tag: '#base_left',
 						html: 'state1 ok'
@@ -21,7 +21,7 @@ exports.test_layer = function(test) {
 				}
 			},
 			'#noid': {
-				html: '123',
+				html: '123'
 			}
 		}
 	};
@@ -48,10 +48,10 @@ exports.test_layer = function(test) {
 				test.ok(!infra.layers[3].show, 'layer 3 not show');
 				test.ok(!infra.layers[4].show, 'layer 4 not show');
 				test.done();
-			})
+			});
 			infra.check();
-		})
+		});
 		infra.check();
-	})
+	});
 	infra.check();
-}
+};

@@ -10,25 +10,26 @@ Infra.ext(function() { // Расширение позволяющие сборк
  * @return {String} Отформатированный вариант состояния.
  */
 	infra.getState = function(pathname) {
-		if (!pathname) pathname = '/';
+		if (!pathname) { pathname = '/'; }
 		var now_location = decodeURIComponent(location.pathname);
 		pathname = decodeURIComponent(pathname);
 		pathname = pathname.replace(/#.+/,''); // убрать location.hash
-		if (pathname[0] != '/') pathname = now_location + '/' + pathname;
+		if (pathname[0] != '/') { pathname = now_location + '/' + pathname; }
 		//if (pathname.slice(-1) != '/') pathname = pathname + '/'; // добавить последний слэш если его нет
 		pathname = pathname.replace(/\/{2,}/g,"\/"); // заменять двойные слэши
 		return pathname;
-	}
+	};
 
 	// Поиск родительской ссылки
 	var parent_a = function(targ) {
 		if (targ.nodeName == 'A') {
-			return targ
+			return targ;
 		} else {
-			if ((!targ.parentNode) || (targ.parentNode == 'HTML')) return false;
-			else return parent_a(targ.parentNode);
+			if ((!targ.parentNode) || (targ.parentNode == 'HTML')) {
+				return false;
+			} else { return parent_a(targ.parentNode); }
 		}
-	}
+	};
 
 	// Обработчик для ссылок
 	var handler = function(e) {

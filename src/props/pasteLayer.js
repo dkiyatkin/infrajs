@@ -7,20 +7,21 @@
 			var m = new Date().getTime();
 			m -= js_first_unick; // Отсчёт всего времени идёт с момента загрузки страницы в миллисекундах
 			var last_unick = js_last_unick||m;
-			while (last_unick >= m) m++;
+			while (last_unick >= m) { m++; }
 			js_last_unick = m;
 			return m;
-		}
+		};
 
 		// Получить у элемента значение css-свойства
 		var getStyle = function(el, cssprop){
-			if (el.currentStyle) //IE
-				return el.currentStyle[cssprop]
-			else if (document.defaultView && document.defaultView.getComputedStyle) //Firefox
-				return document.defaultView.getComputedStyle(el, "")[cssprop]
-			else //try and get inline style
-				return el.style[cssprop]
-		}
+			if (el.currentStyle) {//IE
+				return el.currentStyle[cssprop];
+			} else if (document.defaultView && document.defaultView.getComputedStyle) { //Firefox
+				return document.defaultView.getComputedStyle(el, "")[cssprop];
+			} else { //try and get inline style
+				return el.style[cssprop];
+			}
+		};
 
 		// вставить html, выполнить css и script или получить весь html, если html не передан
 		var html = function(el, html) {
@@ -77,10 +78,12 @@
 			var node = layer.node;
 			if (node.length) {
 				for (var n=0, ll=node.length; n<ll; n++) {
-					html(node[n], layer.html)
+					html(node[n], layer.htmlString)
 				}
-			} else html(node, layer.html)
-		}
-	}
-	Infra.ext(pasteLayer)
+			} else {
+				html(node, layer.htmlString);
+			}
+		};
+	};
+	Infra.ext(pasteLayer);
 })();

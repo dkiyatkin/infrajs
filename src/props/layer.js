@@ -7,15 +7,16 @@
 			layer.show = false; // отметка что слой скрыт
 			layer.status = 'hidden'; // убираем из цикла
 			if (layer.childs) {
-				for (var i = layer.childs.length; --i >= 0;) {
+				var i;
+				for (i = layer.childs.length; --i >= 0;) {
 					hideLayer(layer.childs[i]);
 				}
 			}
 			if (infra.existLayerNode(layer.node)) {
-				layer.html = '';
+				layer.htmlString = '';
 				infra.pasteLayer(layer);
 			}
-		}
+		};
 /*
  * Проверяет равенство узлов.
  *
@@ -24,8 +25,8 @@
  * @return {Boolean} Возвращает **true** если узлы равны.
  */
 		infra.eqLayerNodes = function(node1, node2) {
-			if (node1 == node2) return true
-		}
+			if (node1 == node2) { return true; }
+		};
 		// Скрыть слои которые замещает переданный слой, убрать их из цикла
 		//
 		// Правила:
@@ -35,7 +36,8 @@
 		var hideLayers = function(layer) {
 			// если слой-родитель скрывается, то все его дети уже не могут показаться, за исключением текущего и его потомков
 			//layer.node = infra.getLayerNode(layer); // есть
-			for (var i = infra.layers.length; --i >= 0;) {
+			var i;
+			for (i = infra.layers.length; --i >= 0;) {
 				if (infra.layers[i].show) {
 					infra.layers[i].node = infra.getLayerNode(infra.layers[i]);
 					// или такой же или посмотреть есть ли node слоя в текущем слое
@@ -44,7 +46,7 @@
 					}
 				}
 			}
-		}
+		};
 		// Загрузиться и вставиться
 		//
 		// даже если слой не сможет загрузить свои данные, он не может не показаться, какие бы ошибки в нем не были,
@@ -73,18 +75,18 @@
 											layer.onshow(cb);
 										}
 									});
-							} else cb()
-						})
-					})
+							} else { cb(); }
+						});
+					});
 				}
-			}, 1)
-		}
+			}, 1);
+		};
 		infra.on('layer', function(layer, num, layers_length) {
 			if (infra.circle.state) {
 				if (infra.circle.first) {
 					layer.status = 'queue'; // в первом круге все помещаем в очередь
 					// совпавшее состояние слоя, может быть не полностью равным infra.circle.state
-					var re = new RegExp('^'+layer.state,'im')
+					var re = new RegExp('^'+layer.state,'im');
 					layer.reg_state = infra.circle.state.match(re);
 				}
 				// Пойти на проверки, вернуть в очередь
@@ -92,12 +94,12 @@
 					// Изменить условия проверок для других слоев, занимаем тэги
 					infra.circle.occupied[layer.tag] = layer;
 					// Скрыть и убрать из цикла те слои, которые будут замещены вставленным слоем
-					if (!layer.show) hideLayers(layer); // этот слой может быть показан с прошлого infra.check
+					if (!layer.show) { hideLayers(layer); } // этот слой может быть показан с прошлого infra.check
 					// Вставиться
 					infra.circle.loading++; // отправит infra.check в бесконечный цикл, пока не закончится insert
 					insert(layer, function() {
 						infra.circle.loading--; // выведет infra.check из бесконечного цикла
-					})
+					});
 				}
 				// Если слой показан, и не прошел проверки, но ни один другой слой его не скрыл, слой все равно должен скрыться
 				if (layer.show && (layer.status == 'queue')) {
@@ -109,9 +111,8 @@
 			} else {
 				infra.log.info('no set circle.state');
 			}
-		})
-	}
-if (typeof(window) != 'undefined')
-	Infra.ext(layer)
-if (typeof(window) == 'undefined') module.exports = layer
+		});
+	};
+if (typeof(window) != 'undefined') { Infra.ext(layer); }
+if (typeof(window) == 'undefined') { module.exports = layer; }
 })();
