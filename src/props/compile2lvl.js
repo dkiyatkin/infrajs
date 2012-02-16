@@ -1,51 +1,48 @@
 (function() {
 	var compile = function() {
-		this.on('compile', function(layer, prop, value) {
-			if (prop == 'childs') {
-				if (this.layers.indexOf(layer) == -1) this.layers.push(layer);
-				if (!layer.childs) layer.childs = {};
-				// TODO: labels // if (value['label'] && (typeof(value['label'])=='string')) { this.label[value['label']] = []; }
-				// childs назначаются без последнего слэша, но он потом добавляется
-				// для отдельного state последний слэш не добавляется
-				for (var state in value) if (value.hasOwnProperty(state)) {
-					if (typeof(value[state]) == 'object') {
-						var child_layer = {};
-						child_layer.parent = layer;
-						if ((state[0] == '^') || (state.slice(-1) == '$')) {
-							child_layer.state = state;
+		var infra = this;
+		infra.on('compile', function(layer, prop, value) {
+			if (prop == 'states' || prop == 'tags') {
+				if (Object.prototype.toString.apply(value) === '[object Object]') {
+					if (infra.layers.indexOf(layer) == -1) { infra.layers.push(layer); }
+					if (!layer.childs) { layer.childs = []; }
+					if ((prop == 'states') && !layer.states) { layer.states = {}; }
+					if ((prop == 'tags') && !layer.tags) { layer.tags = {}; }
+					var key;
+					for (key in value) { if (value.hasOwnProperty(key)) {
+						if (Object.prototype.toString.apply(value[key]) === '[object Object]') {
+							var child_layer = {};
+							child_layer.parent = layer;
+							infra.layers.push(child_layer);
+							layer.childs.push(child_layer);
+							if (prop == 'states') {
+								var state = key;
+								if ((state[0] == '^') || (state.slice(-1) == '$')) {
+									child_layer.state = state;
+								} else {
+									child_layer.state = child_layer.parent.state + state + '/';
+								}
+								layer.states[child_layer.state] = child_layer;
+							} else if (prop == 'tags') {
+								var tag = key;
+								child_layer.tag = tag; // тэги не прибавляются как state у childs
+								child_layer.state = layer.state; // state наследуется как у родителя
+								layer.tags[child_layer.tag] = child_layer;
+							}
+							var prop2;
+							for (prop2 in value[key]) { if (value[key].hasOwnProperty(prop2)) {
+								infra.emit('compile', child_layer, prop2, value[key][prop2]);
+							}}
 						} else {
-							child_layer.state = child_layer.parent.state + state + '/';
+							infra.log.error('bad value', prop, value[key]);
 						}
-						this.layers.push(child_layer);
-						layer.childs[child_layer.state] = child_layer;
-						for (var prop2 in value[state]) if (value[state].hasOwnProperty(prop2)) {
-							this.emit('compile', child_layer, prop2, value[state][prop2]);
-						}
-					}
+					}}
+				} else {
+					infra.log.error('bad value', prop, value);
 				}
 			}
 		});
-		this.on('compile', function(layer, prop, tags) {
-			if (prop == 'tags') {
-				if (this.layers.indexOf(layer) == -1) this.layers.push(layer);
-				if (!layer.tags) layer.tags = {};
-				for (var tag in tags) if (tags.hasOwnProperty(tag)) {
-					if (typeof(tags[tag]) == 'object') {
-						var child_layer = {};
-						child_layer.parent = layer;
-						child_layer.tag = tag; // тэги не прибавляются как state у childs
-						child_layer.state = layer.state;
-						this.layers.push(child_layer);
-						layer.tags[child_layer.tag] = child_layer;
-						for (var prop2 in tags[tag]) if (tags[tag].hasOwnProperty(prop2)) { // собрать слой
-							this.emit('compile', child_layer, prop2, tags[tag][prop2]);
-						}
-					}
-				}
-			}
-		})
-	}
-if (typeof(window) != 'undefined')
-	Infra.ext(compile)
-if (typeof(window) == 'undefined') module.exports = compile
+	};
+if (typeof(window) != 'undefined') { Infra.ext(compile); }
+if (typeof(window) == 'undefined') { module.exports = compile; }
 })();

@@ -18,6 +18,13 @@
 							infra.compile(layer._ext, function() {
 								layer._ext = infra.layers;
 								infra.layers = layers;
+								// обновить конфиг
+								// TODO: это сделать рекурсивно и все вынести в функции
+								if (layer.config && layer._ext[0].config) {
+									var param; for (param in layer._ext[0].config) { if (layer._ext[0].config.hasOwnProperty(param)) {
+										if (!layer.config[param]) { layer.config[param] = layer._ext[0].config[param]; }
+									}}
+								}
 								// переопределить слой
 								var prop; for (prop in layer._ext[0]) { if (layer._ext[0].hasOwnProperty(prop)) {
 									if (!layer[prop]) {
@@ -40,12 +47,6 @@
 											};
 										}
 									})(eList[i]);
-								}
-								// обновить конфиг
-								if (layer.config && layer._ext[0].config) {
-									var param; for (param in layer._ext[0].config) { if (layer._ext[0].config.hasOwnProperty(param)) {
-										if (!layer.config[param]) { layer.config[param] = layer._ext[0].config[param]; }
-									}}
 								}
 								// добавить новые
 								len = layer._ext.length;

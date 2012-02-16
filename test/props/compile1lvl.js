@@ -10,17 +10,13 @@ if (typeof(window) == 'undefined') {
 }
 
 exports.test_tag = function(test) {
-	test.expect(2);
+	test.expect(1);
 	var infra = Infra.init();
 	infra.index = { tag: '#base_html' };
-	var infra2 = Infra.init();
-	infra2.index = { div: 'base_html' };
 	infra.check();
-	infra2.check();
-	test.strictEqual(infra.layers[0].tag, '#base_html', 'tag')
-	test.strictEqual(infra2.layers[0].tag, '#base_html', 'div')
+	test.strictEqual(infra.layers[0].tag, '#base_html', 'tag');
 	test.done();
-}
+};
 
 exports.test_double__check = function(test) {
 	var infra = Infra.init();
@@ -28,7 +24,7 @@ exports.test_double__check = function(test) {
 	test.expect(4);
 	infra.on('layer', function(layer, num, layers_length, first) {
 		test.ok(true, 'double _check');
-	})
+	});
 	infra.check(function(cb) {
 		cb();
 	});
@@ -39,7 +35,7 @@ exports.test_double__check = function(test) {
 		test.done();
 		cb();
 	});
-}
+};
 
 exports.test_layer_listeners = function(test) {
 	test.expect(2);
@@ -54,7 +50,7 @@ exports.test_layer_listeners = function(test) {
 	infra.check();
 	var testfunc = function() {
 		test.ok(true, 'onchecked');
-	}
+	};
 	infra.layers[0].oncheck(testfunc);
 	infra.layers[0].onshow(test.done);
-}
+};

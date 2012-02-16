@@ -88,7 +88,7 @@
 DOM-узел или узлы, куда вставиться слой.
 
 ### layer.id = 'layerId'
-Уникальный id слоя. Получить нужный слой по id — `infra.layersId['layerId']`.
+Уникальный id слоя. Получить нужный слой по id — `infra.ids['layerId']`.
 
 ### layer.parent = {parentLayer}
 Ссылка на родительский слой.

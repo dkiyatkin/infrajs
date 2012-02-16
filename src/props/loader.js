@@ -5,7 +5,7 @@ Infra.ext(function() {
 		loader.setAttribute('style', 'display:block;width:30px;height:30px;left:50%;top:50%;position:fixed;margin-left:-15px;margin-top:-15px;');
 		var html = document.getElementsByTagName('html')[0];
 		return {
-			src: '/infra/plugins/infrajs/images/loader.gif',
+			src: '../images/loader.gif',
 			show: function() {
 				try {
 					loader.setAttribute('src', this.src);
