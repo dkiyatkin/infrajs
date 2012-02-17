@@ -78,10 +78,10 @@
 Данные так же хранятся в `infra.load.cache['/path/to/json/data.json'].data`
 Загружаются и парсятся из файла определенного в `layer.json`.
 
-### layer.tplString = '<p>{{tplString}}</p>'
+### layer.tplString = '&lt;p&gt;{{tplString}}&lt;/p&gt;'
 Текстовый шаблон для вставки в дом.
 
-### layer.htmlString = '<p>htmlString</p>'
+### layer.htmlString = '&lt;p&gt;htmlString&lt;/p&gt;'
 Текстовые распарсенные шаблонные данные для вставки в дом.
 
 ### layer.node = [NodeList] || {HTMLElement}
