@@ -49,6 +49,15 @@
 				infra.compile(infra.index, function() {
 					cb();
 				});
+				// установить id слоям
+				infra.ids = {};
+				var i; for (i = infra.layers.length; --i >= 0;) {
+					var layer = infra.layers[i];
+					if (!layer.id) {
+						layer.id = i;
+					}
+					infra.ids[layer.id] = layer;
+				}
 			} else {
 				cb();
 			}

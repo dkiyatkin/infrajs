@@ -21,12 +21,12 @@ var Infra = {
 					// Откомпилировать слой, считать статусы
 					return {
 						layers: [] // готовые слои
-					}
+					};
 				} else {
-					throw 'HTML5 History API not supported'
+					throw 'HTML5 History API not supported';
 				}
 			} else {
-				throw 'Array indexOf not supported'
+				throw 'Array indexOf not supported';
 			}
 		//}
 	},
@@ -52,9 +52,10 @@ var Infra = {
 			cb.apply(infra, arguments);
 			//infra.constructor = arguments.callee;
 			return infra;
-		}
+		};
 	}
 };
+if (typeof(window) == 'undefined') { Infra.init = function() { return { layers: [] }; }; module.exports = Infra; }
 (function() {
 	Infra.ext(function() {
 		var infra = this;
@@ -70,30 +71,50 @@ var Infra = {
  *		infra.browser.safari // true если используется Safari
  */
 		infra.browser = {};
-		this.browser.IE=(function (){if(window.opera)return false; var rv = 0;if (navigator.appName == 'Microsoft Internet Explorer') {var ua = navigator.userAgent;var re = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");if (re.exec(ua) != null)rv = parseFloat(RegExp.$1);}return rv;})();
-		this.browser.opera=/opera/.test(navigator.userAgent)||window.opera;
-		this.browser.chrome=/Chrome/.test(navigator.userAgent)
-		this.browser.webkit=/WebKit/.test(navigator.userAgent);
-		this.browser.safari=(this.browser.webkit&&!this.browser.chrome);
-	})
+		this.browser.IE = (function () {
+			if (window.opera) {
+				return false;
+			}
+			var rv = 0;
+			if (navigator.appName == 'Microsoft Internet Explorer') {
+				var ua = navigator.userAgent;
+				var re = new RegExp("MSIE ([0-9]{1,}[.0-9]{0,})");
+				//var re = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+				if (re.exec(ua) !== null) {
+					rv = parseFloat(RegExp.$1);
+				}
+			}
+			return rv;
+		})();
+		this.browser.opera = /opera/.test(navigator.userAgent) || window.opera;
+		this.browser.chrome = /Chrome/.test(navigator.userAgent);
+		this.browser.webkit = /WebKit/.test(navigator.userAgent);
+		this.browser.safari = (this.browser.webkit && !this.browser.chrome);
+	});
 })();
 (function() {
 var Logger = function() {
 	var loggers = ['ERROR', 'WARNING', 'INFO', 'DEBUG'];
 	var _log = function(messages, level, logger, quiet) {
-		var message;
-		for (var i in messages) if (messages.hasOwnProperty(i)) {
-			if (!message) message = messages[i];
-			else message = message + ' ' + messages[i]
-		}
-		for (var l = loggers.length; --l >= level;) {
+		var i, message;
+		for (i in messages) { if (messages.hasOwnProperty(i)) {
+			if (!message) {
+				message = messages[i];
+			} else {
+				message = message + ' ' + messages[i];
+			}
+		}}
+		var l;
+		for (l = loggers.length; --l >= level;) {
 			if (loggers[l] == logger) {
 				var msg = '[' + new Date().toGMTString() + '] ' + loggers[level] + ' ' + message;
-				if (!quiet) console.log(msg);
-				return msg
+				if (!quiet) {
+					console.log(msg);
+				}
+				return msg;
 			}
 		}
-	}
+	};
 	return {
 		quiet: false,
 		logger: 'WARNING',
@@ -109,8 +130,8 @@ var Logger = function() {
 		error: function() {
 			return _log(arguments, 0, this.logger, this.quiet);
 		}
-	}
-}
+	};
+};
 var newLogger = function() {
 	var infra = this;
 /*
@@ -126,8 +147,13 @@ var newLogger = function() {
  *		infra.log.debug('test debug'); // ничего не произойдет, потому что логгер задан уровнем выше
  */
 	infra.log = Logger();
-}
+};
+if (typeof(window) !== 'undefined') {
 	Infra.ext(newLogger);
+}
+if (typeof(window) === 'undefined') {
+	module.exports = newLogger;
+}
 })();
 (function() {
 	var events = function() {
@@ -150,7 +176,9 @@ var newLogger = function() {
  * @param {Function} callback Функция-обработчик.
  */
 		infra.on = function(name, callback) {
-			if (!_listeners[name]) _listeners[name] = [];
+			if (!_listeners[name]) {
+				_listeners[name] = [];
+			}
 			_listeners[name].push(callback);
 		};
 /*
@@ -159,8 +187,12 @@ var newLogger = function() {
  * @param {Function} callback Функция-обработчик.
  */
 		infra.once = function(name, callback) { // создает обработчик на один раз
-			if (!_listeners[name]) _listeners[name] = [];
-			if (!_del_listeners[name]) _del_listeners[name] = [];
+			if (!_listeners[name]) {
+				_listeners[name] = [];
+			}
+			if (!_del_listeners[name]) {
+				_del_listeners[name] = [];
+			}
 			_listeners[name].push(callback);
 			_del_listeners[name].push(callback);
 		};
@@ -171,21 +203,24 @@ var newLogger = function() {
  */
 		infra.emit = function(name) {
 			var args = [];
-			for (var i = 1, len = arguments.length; i < len; i++) {
-				args.push(arguments[i]);
-			}
+			var i, len;
 			if (_listeners[name]) {
-				for (var i=0, len=_listeners[name].length; i<len; i++) {
-					if (_listeners[name][i]) { // может он уже удален
-						_listeners[name][i].apply(this, args);
-						// удалить если нужно
+				// собрали аргументы
+				for (i = 1, len = arguments.length; i < len; i++) {
+					args.push(arguments[i]);
+				}
+				for (i=0, len = _listeners[name].length; i<len; i++) {
+					var emitter = _listeners[name][i];
+					if (emitter) { // может он уже удален
+						// сперва удалить если нужно
 						if (_del_listeners[name]) {
-							var pos = _del_listeners[name].indexOf(_listeners[name][i])
+							var pos = _del_listeners[name].indexOf(emitter);
 							if (pos > -1) {
 								_del_listeners[name].splice(pos,1);
 								_listeners[name].splice(i,1);
 							}
 						}
+						emitter.apply(this, args);
 					}
 				}
 			}
@@ -196,9 +231,11 @@ var newLogger = function() {
  * @return {Array} Массив обработчиков.
  */
 		infra.listeners = function(name) {
-			if (!_listeners[name]) _listeners[name] = [];
+			if (!_listeners[name]) {
+				_listeners[name] = [];
+			}
 			return _listeners[name];
-		}
+		};
 /*
  * Удаляет все обработчики для указанного события.
  * @param {String} name Имя события.
@@ -206,21 +243,23 @@ var newLogger = function() {
 		infra.removeAllListeners = function(name) { // удаляет все обработчики из массива обработчиков для указанного события
 			_listeners[name] = [];
 			_del_listeners[name] = [];
-		}
+		};
 		//this._listeners = _listeners;
-	}
-	Infra.ext(events)
+	};
+if (typeof(window) != 'undefined') { Infra.ext(events); }
+if (typeof(window) == 'undefined') { module.exports = events; }
 })();
 Infra.ext(function() {
 	var infra = this;
 	var Loader = function() {
 		var loader = document.createElement('img');
-		loader.setAttribute('src', '/infra/plugins/infrajs/images/loader.gif');
 		loader.setAttribute('style', 'display:block;width:30px;height:30px;left:50%;top:50%;position:fixed;margin-left:-15px;margin-top:-15px;');
 		var html = document.getElementsByTagName('html')[0];
 		return {
+			src: '../images/loader.gif',
 			show: function() {
 				try {
+					loader.setAttribute('src', this.src);
 					html.appendChild(loader);
 					return true;
 				} catch (e) {
@@ -235,8 +274,8 @@ Infra.ext(function() {
 					infra.log.error('error hide loader');
 				}
 			}
-		}
-	}
+		};
+	};
 /*
  * Объект позволяющий управлять графическим индикатором загрузки.
  *
@@ -247,10 +286,10 @@ Infra.ext(function() {
 	infra.loader = Loader();
 	infra.on('start', function() {
 		infra.loader.show();
-	})
+	});
 	infra.on('end', function() {
 		infra.loader.hide();
-	})
+	});
 });
 (function() {
 	var load = function () {
@@ -271,7 +310,9 @@ Infra.ext(function() {
 					_loading[path] = true;
 					infra.load._load(path, function(err, ans) {
 						infra.load.cache.text[path] = ans;
-						if (err) infra.log.error('error load ' + path);
+						if (err) {
+							infra.log.error('error load ' + path);
+						}
 						_loading[path] = false;
 						infra.emit('load: ' + path, err);
 						cb(err, infra.load.cache.text[path]);
@@ -280,12 +321,12 @@ Infra.ext(function() {
 					infra.log.debug('add load queue for ' + path);
 					infra.once('load: ' + path, function(err) {
 						cb(err, infra.load.cache.text[path]);
-					})
+					});
 				}
 			} else {
-				cb(0, infra.load.cache.text[path])
+				cb(0, infra.load.cache.text[path]);
 			}
-		}
+		};
 
 /*
  * Загружает переданный путь как текст, не используя кэширование.
@@ -297,7 +338,7 @@ Infra.ext(function() {
  * @param {Boolean} json Ключ для получения json ответа.
  */
 		infra.load._load = function(path, cb, json) {
-			if(typeof(path)!=='string')cb(0, null);
+			if (typeof(path)!=='string') { cb(0, null); }
 			function createRequestObject() {
 				if (typeof XMLHttpRequest === 'undefined') {
 					XMLHttpRequest = function() {
@@ -330,9 +371,9 @@ Infra.ext(function() {
 						cb(0, null);
 					}
 				}
-			}
+			};
 			req.send(null);
-		}
+		};
 
 /*
  * Загружает переданный путь как JSON-объект, если он уже загружен то будет получен кэшированный ответ.
@@ -341,26 +382,26 @@ Infra.ext(function() {
  * @param {Function} callback Callback функция, первый агрумент содержит ошибку запроса, второй JSON-объект полученных данных с сервера.
  */
 		infra.load.json = function(path, cb) {
-			if (!infra.load.cache.json[path]) {
+			if (!infra.load.cache.data[path]) {
 				infra.load(path, function(err, json) {
 					try {
-						infra.load.cache.json[path] = JSON.parse(json);
+						infra.load.cache.data[path] = JSON.parse(json);
 					} catch (e) {
 						infra.log.error('wrong json data ' + path);
 					}
-					cb(err, infra.load.cache.json[path])
-				}, true)
+					cb(err, infra.load.cache.data[path]);
+				}, true);
 			} else {
-				cb(0, infra.load.cache.json[path])
+				cb(0, infra.load.cache.data[path]);
 			}
-		}
+		};
 
 		// Выполнить js
 		var globalEval = function(data) {
-			if (!data) return;
+			if (!data) { return; }
 			// Inspired by code by Andrea Giammarchi
 			// http://webreflection.blogspot.com/2007/08/global-scope-evaluation-and-dom.html
-			if ((infra.browser.IE==false) && (infra.browser.safari==false)) {
+			if ((infra.browser.IE===false) && (infra.browser.safari===false)) {
 				window.eval(data);
 			} else if (!infra.browser) {
 				eval(data);
@@ -371,7 +412,7 @@ Infra.ext(function() {
 				head.insertBefore(script, head.firstChild);
 				head.removeChild(script);
 			}
-		}
+		};
 
 		// Реализация кросс-доменного запроса
 		var setXDR = function(path) {
@@ -381,7 +422,7 @@ Infra.ext(function() {
 			script.src = path;
 			head.insertBefore(script, head.firstChild);
 			head.removeChild(script);
-		}
+		};
 
 /*
  * Загружает переданный путь и выполняет его как javascript-код, если он уже загружен то будет выполнен повторно.
@@ -399,19 +440,20 @@ Infra.ext(function() {
 				cb(0);
 			} else {
 				infra.load(path, function(err, ans) {
-					if (err) cb(err);
-					else {
+					if (err) {
+						cb(err);
+					} else {
 						try {
 							globalEval(ans); // <-
 							cb(0);
 						} catch (e) {
 							infra.log.error('wrong js ' + path);
-							cb(e)
+							cb(e);
 						}
 					}
-				})
+				});
 			}
-		}
+		};
 		infra.load.exec = infra.load.js;
 
 		var busy = false;
@@ -440,7 +482,7 @@ Infra.ext(function() {
 				}
 				busy = false;
 			}
-		}
+		};
 
 /*
  * Вставляет стили на страницу и применяет их.
@@ -448,7 +490,7 @@ Infra.ext(function() {
  * @param {String} code Код css для вставки в документ.
  */
 		infra.load.styles = function(code) {
-			if (infra.load.cache.style[code]) return; //Почему-то если это убрать после нескольких перепарсиваний стили у слоя слетают..
+			if (infra.load.cache.style[code]) { return; } //Почему-то если это убрать после нескольких перепарсиваний стили у слоя слетают..
 			infra.load.cache.style[code] = true;
 			var style = document.createElement('style'); //создани style с css
 			style.type = "text/css";
@@ -459,7 +501,7 @@ Infra.ext(function() {
 			}
 			var head = document.getElementsByTagName("head")[0] || document.documentElement;
 			head.insertBefore(style, head.lastChild); //добавили css на страницу
-		}
+		};
 
 /*
  * Объект хранит кэш-данные.
@@ -467,18 +509,19 @@ Infra.ext(function() {
  * Примеры:
  *		infra.load.cache.style['css-code'] // если true, то указанный css-код применился.
  *		infra.load.cache.text['path/to/file'] // возвращает загруженный текст по указанному пути.
- *		infra.load.cache.json['path/to/file'] // возвращает json объект, полученный из текста по указанному пути.
+ *		infra.load.cache.data['path/to/file'] // возвращает объект, полученный из текста по указанному пути.
  */
 		infra.load.cache = {
-			style: {}, json: {}, text: {}
-		}
+			style: {}, data: {}, text: {}
+		};
 
 		// Очистка кэша по регекспу
 		var _clearRegCache = function(clean, obj) {
-			for (var key in obj) if (obj.hasOwnProperty(key)) {
-				if (clean.test(key)) delete(obj[key]);
-			}
-		}
+			var key;
+			for (key in obj) { if (obj.hasOwnProperty(key)) {
+				if (clean.test(key)) { delete(obj[key]); }
+			}}
+		};
 /*
  * Очищает кэш в зависимости от переданного параметра.
  *
@@ -486,18 +529,19 @@ Infra.ext(function() {
  */
 		infra.load.clearCache = function(clean) {
 			if (typeof(clean) == 'undefined') {
-				infra.load.cache.json = {};
+				infra.load.cache.data = {};
 				infra.load.cache.text = {};
 			} else if (clean.constructor == RegExp) {
-				_clearRegCache(clean, infra.load.cache.json);
+				_clearRegCache(clean, infra.load.cache.data);
 				_clearRegCache(clean, infra.load.cache.text);
 			} else {
-				delete(infra.load.cache.json[clean]);
+				delete(infra.load.cache.data[clean]);
 				delete(infra.load.cache.text[clean]);
 			}
-		}
-	}
-	Infra.ext(load)
+		};
+	};
+if (typeof(window) != 'undefined') { Infra.ext(load); }
+if (typeof(window) == 'undefined') { module.exports = load; }
 })();
 (function() {
 	var setCheck = function() {
@@ -520,7 +564,7 @@ Infra.ext(function() {
 			if (!index.splice) {
 				_compileObj(index);
 			} else {
-				for (var i = index.length; --i >= 0;) {
+				var i; for (i = index.length; --i >= 0;) {
 					_compileObj(index[i]);
 				}
 			}
@@ -528,10 +572,10 @@ Infra.ext(function() {
 		};
 		var _compileObj = function(index) {
 			var layer = {}; // самый первый слой
-			for (var prop in index) if (index.hasOwnProperty(prop)) {
+			var prop; for (prop in index) { if (index.hasOwnProperty(prop)) {
 				infra.emit('compile', layer, prop, index[prop]);
-			}
-		}
+			}}
+		};
 		var setCircle = function() {
 			infra.log.debug('first circle');
 			infra.circle = {
@@ -542,20 +586,24 @@ Infra.ext(function() {
 				last: false, // последний раз
 				loading: 0, // счетчик ассинхронных загрузок
 				state: infra.state
-			}
-		}
+			};
+		};
 		var _compile = function(cb) {
 			// Если слоев нету в памяти, то собрать их, используя index
 			if (!infra.layers.length) {
 				infra.compile(infra.index, function() {
 					cb();
 				});
-			} else cb();
-		}
+			} else {
+				cb();
+			}
+		};
 		var _check = function(cb) {
-			if (!infra.layers.length) infra.log.info('empty layers');
+			if (!infra.layers.length) {
+				infra.log.info('empty layers');
+			}
 			setTimeout(function() {
-				for (var i = infra.layers.length; --i >= 0;) { // если слой пустой, сюда даже не заходит
+				var i; for (i = infra.layers.length; --i >= 0;) { // если слой пустой, сюда даже не заходит
 					infra.circle.num = i;
 					infra.emit('layer', infra.layers[i], i, infra.layers.length);
 				}
@@ -567,7 +615,7 @@ Infra.ext(function() {
 					infra.circle.loading = 0;
 					infra.circle.last = true;
 				}
-				if (infra.circle.loading == 0) {
+				if (infra.circle.loading === 0) {
 					if (infra.circle.last) {
 						infra.circle.last = false;
 						infra.emit('end', cb);
@@ -608,48 +656,83 @@ Infra.ext(function() {
 						}
 						setCircle();
 						infra.circle.timeout = timeout;
-						if (!infra.circle.timeout) infra.circle.timeout = 1;
+						if (!infra.circle.timeout) {
+							infra.circle.timeout = 1;
+						}
 						_check(cb);
 					}
 				} else { // отпустить загрузки.. запустить чек, позже, насколько позволяет очередь, убирать из очереди старые обработчики
 					infra.circle.interrupt = true;
 					infra.once('queue', function() {
 						infra.check(cb);
-					})
+					});
 					var listeners = infra.listeners('queue');
-					listeners.splice(0, listeners.length - queue)
+					listeners.splice(0, listeners.length - queue);
 				}
-			})
-		}
+			});
+		};
 		infra.on('end', function(cb) {
 			var queue = function() {
 				_process = false;
+			};
+			if (typeof(cb) === 'function') {
+				cb(queue.bind(infra));
+			} else {
+				queue.call(infra);
 			}
-			if (typeof(cb) === 'function') cb(queue.bind(infra));
-			else queue.call(infra);
-		})
-	}
-	Infra.ext(setCheck)
+		});
+	};
+if (typeof(window) != 'undefined') { Infra.ext(setCheck); }
+if (typeof(window) == 'undefined') { module.exports = setCheck; }
 })();
 (function() {
-	var empty = function(cb){cb()};
+	var empty = function(cb) { cb(); };
 	var compile = function() {
 		var infra = this;
+		infra.labels = {};
+		infra.ids = {};
+		var id = 0;
 		this.on('compile', function(layer, prop, value) {
-			if (!layer.state) layer.state = '/'; // устанавливаем общий state всем слоям
-			if (prop == 'tag' || prop == 'state' || prop == '_ext' || prop == 'ext') {
-				if (this.layers.indexOf(layer) == -1) this.layers.push(layer);
-				layer[prop] = value;
-			} else if (prop == 'div') {
-				if (this.layers.indexOf(layer) == -1) this.layers.push(layer);
-				layer['tag'] = '#'+value;
+			if (!layer.state) {
+				layer.state = '/'; // устанавливаем общий state всем слоям
+			}
+			if (!layer.id) {
+				layer.id = id++;
+				infra.ids[layer.id] = layer;
+			}
+			var oneprops = ['tag','state', 'css', 'json', 'tpl', 'label', 'ext', 'config', 'data', 'tplString', 'htmlString', 'id'];
+			if (oneprops.indexOf(prop) != -1) {
+				if (this.layers.indexOf(layer) == -1) {
+					this.layers.push(layer);
+				}
+				if (prop == 'config' || prop == 'data') { // объекты
+					if (Object.prototype.toString.apply(value) === '[object Object]') {
+						layer[prop] = value;
+					} else {
+						infra.log.error('bad value', prop, value);
+					}
+				} else { // строки
+					if (Object.prototype.toString.apply(value) === '[object String]') {
+						layer[prop] = value;
+						if (prop == 'label') {
+							var labels = value.replace(/^\s+|\s+$/g,'').split(' ');
+							var i; for (i = labels.length; --i >= 0;) {
+								if (!infra.labels[labels[i]]) {
+									infra.labels[labels[i]] = [];
+								}
+								infra.labels[labels[i]].push(layer);
+							}
+						}
+						if (prop == 'id') {
+							infra.ids[prop] = layer;
+						}
+					} else {
+						infra.log.error('bad value', prop, value);
+					}
+				}
 			}
 		});
 		this.on('compile', function(layer, prop, value) {
-			if (prop == '_tpl' || prop == 'html' || prop == 'tpl' || prop == '_data' || prop == 'data' || prop == 'config') {
-				if (this.layers.indexOf(layer) == -1) this.layers.push(layer);
-				layer[prop] = value;
-			}
 			if (prop == 'onload' || prop == 'onshow' || prop == 'oncheck') {
 				layer['_'+prop] = value;
 				layer[prop] = function(cb) {
@@ -659,9 +742,8 @@ Infra.ext(function() {
 						infra.log.error(prop + ' ' +e);
 						cb();
 					}
-				}
+				};
 			}
-			if (!layer.config) layer.config = {};
 			if (!layer.oncheck) {
 				layer.oncheck = empty; layer._oncheck = false;
 			}
@@ -671,58 +753,58 @@ Infra.ext(function() {
 			if (!layer.onshow) {
 				layer.onshow = empty; layer._onshow = false;
 			}
-		})
-	}
-	Infra.ext(compile)
+		});
+	};
+if (typeof(window) != 'undefined') { Infra.ext(compile); }
+if (typeof(window) == 'undefined') { module.exports = compile; }
 })();
 (function() {
 	var compile = function() {
-		this.on('compile', function(layer, prop, value) {
-			if (prop == 'childs') {
-				if (this.layers.indexOf(layer) == -1) this.layers.push(layer);
-				if (!layer.childs) layer.childs = {};
-				// TODO: labels // if (value['label'] && (typeof(value['label'])=='string')) { this.label[value['label']] = []; }
-				// childs назначаются без последнего слэша, но он потом добавляется
-				// для отдельного state последний слэш не добавляется
-				for (var state in value) if (value.hasOwnProperty(state)) {
-					if (typeof(value[state]) == 'object') {
-						var child_layer = {};
-						child_layer.parent = layer;
-						if ((state[0] == '^') || (state.slice(-1) == '$')) {
-							child_layer.state = state;
+		var infra = this;
+		infra.on('compile', function(layer, prop, value) {
+			if (prop == 'states' || prop == 'tags') {
+				if (Object.prototype.toString.apply(value) === '[object Object]') {
+					if (infra.layers.indexOf(layer) == -1) { infra.layers.push(layer); }
+					if (!layer.childs) { layer.childs = []; }
+					if ((prop == 'states') && !layer.states) { layer.states = {}; }
+					if ((prop == 'tags') && !layer.tags) { layer.tags = {}; }
+					var key;
+					for (key in value) { if (value.hasOwnProperty(key)) {
+						if (Object.prototype.toString.apply(value[key]) === '[object Object]') {
+							var child_layer = {};
+							child_layer.parent = layer;
+							infra.layers.push(child_layer);
+							layer.childs.push(child_layer);
+							if (prop == 'states') {
+								var state = key;
+								if ((state[0] == '^') || (state.slice(-1) == '$')) {
+									child_layer.state = state;
+								} else {
+									child_layer.state = child_layer.parent.state + state + '/';
+								}
+								layer.states[child_layer.state] = child_layer;
+							} else if (prop == 'tags') {
+								var tag = key;
+								child_layer.tag = tag; // тэги не прибавляются как state у childs
+								child_layer.state = layer.state; // state наследуется как у родителя
+								layer.tags[child_layer.tag] = child_layer;
+							}
+							var prop2;
+							for (prop2 in value[key]) { if (value[key].hasOwnProperty(prop2)) {
+								infra.emit('compile', child_layer, prop2, value[key][prop2]);
+							}}
 						} else {
-							child_layer.state = child_layer.parent.state + state + '/';
+							infra.log.error('bad value', prop, value[key]);
 						}
-						this.layers.push(child_layer);
-						layer.childs[child_layer.state] = child_layer;
-						for (var prop2 in value[state]) if (value[state].hasOwnProperty(prop2)) {
-							this.emit('compile', child_layer, prop2, value[state][prop2]);
-						}
-					}
+					}}
+				} else {
+					infra.log.error('bad value', prop, value);
 				}
 			}
 		});
-		this.on('compile', function(layer, prop, tags) {
-			if (prop == 'tags') {
-				if (this.layers.indexOf(layer) == -1) this.layers.push(layer);
-				if (!layer.tags) layer.tags = {};
-				for (var tag in tags) if (tags.hasOwnProperty(tag)) {
-					if (typeof(tags[tag]) == 'object') {
-						var child_layer = {};
-						child_layer.parent = layer;
-						child_layer.tag = tag; // тэги не прибавляются как state у childs
-						child_layer.state = layer.state;
-						this.layers.push(child_layer);
-						layer.tags[child_layer.tag] = child_layer;
-						for (var prop2 in tags[tag]) if (tags[tag].hasOwnProperty(prop2)) { // собрать слой
-							this.emit('compile', child_layer, prop2, tags[tag][prop2]);
-						}
-					}
-				}
-			}
-		})
-	}
-	Infra.ext(compile)
+	};
+if (typeof(window) != 'undefined') { Infra.ext(compile); }
+if (typeof(window) == 'undefined') { module.exports = compile; }
 })();
 (function() {
 	var checkLayer = function() {
@@ -732,7 +814,7 @@ Infra.ext(function() {
 			if (infra.existLayerNode(layer.node)) {
 				return true;
 			}
-		}
+		};
 		// Проверяет наличие занятых дочерних и родительских тэгов
 		var stateOk = function(layer) {
 			// state устраивает или нет
@@ -740,15 +822,15 @@ Infra.ext(function() {
 			// TODO: Сделать по возрастанию совпадения, а не любое следующее
 			if (infra.circle.last) { // не в первый круг, и когда кончились загрузки
 				if (layer.reg_state && layer.reg_state[0]) {
-					if (infra.circle.state == layer.reg_state[0]) return true;
-					if ((infra.circle.count != 1) && (infra.circle.loading == 0)) {
+					if (infra.circle.state == layer.reg_state[0]) { return true; }
+					if ((infra.circle.count != 1) && (infra.circle.loading === 0)) {
 						//infra.log.debug('match wait state');
 						return true;
 					}
 					infra.circle.last = false; // совпадения по state есть, значит круг будет не последний
 				}
 			}
-		}
+		};
 
 /*
  * Проверяет есть ли данный узел в DOM.
@@ -758,37 +840,45 @@ Infra.ext(function() {
  */
 		infra.existLayerNode = function(node, layer) {
 			if (!layer) {
-				if (node && (node.length!=0 || node.length == undefined)) { // смотрим есть ли он в DOM
+				if (node && (node.length !== 0 || node.length === undefined)) { // смотрим есть ли он в DOM
 					return true;
 				} else {
 					return false;
 				}
 			} else {
+				var child_node;
 				var occupied = false;
 				if (node.length) {
-					for (var i = node.length; --i >= 0;) {
-						var child_node = infra.getLayerNode(layer, node[i]);
+					var i;
+					for (i = node.length; --i >= 0;) {
+						child_node = infra.getLayerNode(layer, node[i]);
 						if (infra.existLayerNode(child_node)) {
 							occupied = true;
-							break
+							break;
 						}
 					}
-					if (occupied) return occupied;
+					if (occupied) { return occupied; }
 				} else {
-					var child_node = infra.getLayerNode(layer, node);
-					if (infra.existLayerNode(child_node)) occupied = true;
+					child_node = infra.getLayerNode(layer, node);
+					if (infra.existLayerNode(child_node)) {
+						occupied = true;
+					}
 				}
 				return occupied;
 			}
-		}
+		};
 		// если родитель скрыт, то и слой показаться не может
 		var busyTag = function(layer) {
-			if (infra.circle.occupied[layer.tag]) return true
-			else  return false
-		}
+			if (infra.circle.occupied[layer.tag]) {
+				return true;
+			} else {
+				return false;
+			}
+		};
 		var busyTags = function(layer) {
 			//layer.node = infra.getLayerNode(layer); // уже есть
-			for (var tag in infra.circle.occupied) if (infra.circle.occupied.hasOwnProperty(tag)) {
+			var tag;
+			for (tag in infra.circle.occupied) { if (infra.circle.occupied.hasOwnProperty(tag)) {
 				// дочерние тэги
 				if (infra.existLayerNode(layer.node, infra.circle.occupied[tag])) {
 					//infra.log.debug(layer.tag + '	' + layer.state + '	' + layer.show + '	' + layer.status + ' busy child tag ' + tag);
@@ -799,30 +889,30 @@ Infra.ext(function() {
 				//if (_occupied(infra.circle.occupied[tag].node, layer)) {
 				//return true;
 				//}
-			}
-		}
+			}}
+		};
 		var _checkLayer = function(layer) {
 			if (layer.parent && !layer.parent.show) {
-				return 'no parent'
+				return 'no parent';
 			}
 			if (busyTag(layer)) {
-				return 'busy tag ' + layer.tag
+				return 'busy tag ' + layer.tag;
 			}
 			if (!isPasted(layer)) { // вставляется ли слой
-				return 'not inserted'
+				return 'not inserted';
 			}
 			// посмотреть нет ли в текущем тэге каких-либо занятых тэгов
 			if (!layer.show) { // у показанного слоя вполне себе могут быть заняты дочерние тэги
 				if (busyTags(layer)) {
-					return 4
+					return 4;
 				}
 			}
 			// подходит ли state
 			if (!stateOk(layer)) {
-				return 'state mismatch'
+				return 'state mismatch';
 			}
-			return true
-		}
+			return true;
+		};
 
 /*
  * Возвращает DOM-узел переданного слоя.
@@ -831,20 +921,24 @@ Infra.ext(function() {
  * @param {Object} [parent_element] Узел в котором бдет происходить поиск. Если не задан, то берется window.document.
  */
 		infra.getLayerNode = function(layer, parent_element) {
-			if (!parent_element) parent_element = document;
+			if (!parent_element) { parent_element = document; }
 			var tag = layer.tag;
 			if (!tag) {
 				infra.log.warning('error set node, where layer.state ' + layer.state);
-				return
+				return;
 			}
 			var node = false;
 			var selector = tag.slice(1);
 			if (tag[0] == '#') {
-				if (parent_element == document) node = document.getElementById(selector);
-				else {
+				if (parent_element == document) {
+					node = document.getElementById(selector);
+				} else {
 					var child_elements = parent_element.getElementsByTagName('*');
-					for (var i = child_elements.length; --i >= 0;) {
-						if (selector == child_elements[i].id) node = child_elements[i];
+					var i;
+					for (i = child_elements.length; --i >= 0;) {
+						if (selector == child_elements[i].id) {
+							node = child_elements[i];
+						}
 					}
 				}
 			} else if (tag[0] == '.') {
@@ -853,7 +947,7 @@ Infra.ext(function() {
 				node = parent_element.getElementsByTagName(tag);
 			}
 			return node;
-		}
+		};
 /*
  * Проверяет слой, может ли он быть вставлен, возвращает в очередь при неудаче.
  *
@@ -862,7 +956,7 @@ Infra.ext(function() {
  * @param {Object} layer Описание слоя.
  */
 		infra.checkLayer = function(layer) {
-			if (layer.status != 'queue') return false;
+			if (layer.status != 'queue') { return false; }
 			// проверка условий слоя, если не проходит, то слой отправляется в queue
 			layer.status = 'check';
 			layer.check = _checkLayer(layer);
@@ -873,12 +967,13 @@ Infra.ext(function() {
 				if (layer.show) {
 					//infra.log.debug('layer should be hidden: ' + layer.check);
 				}
-				layer.status = 'queue'
-				return false // возвращаем в очередь
-			} else return true
-		}
-	}
-	Infra.ext(checkLayer)
+				layer.status = 'queue';
+				return false; // возвращаем в очередь
+			} else { return true; }
+		};
+	};
+if (typeof(window) != 'undefined') { Infra.ext(checkLayer); }
+if (typeof(window) == 'undefined') { module.exports = checkLayer; }
 })();
 (function() {
 	var pasteLayer = function() {
@@ -889,20 +984,21 @@ Infra.ext(function() {
 			var m = new Date().getTime();
 			m -= js_first_unick; // Отсчёт всего времени идёт с момента загрузки страницы в миллисекундах
 			var last_unick = js_last_unick||m;
-			while (last_unick >= m) m++;
+			while (last_unick >= m) { m++; }
 			js_last_unick = m;
 			return m;
-		}
+		};
 
 		// Получить у элемента значение css-свойства
 		var getStyle = function(el, cssprop){
-			if (el.currentStyle) //IE
-				return el.currentStyle[cssprop]
-			else if (document.defaultView && document.defaultView.getComputedStyle) //Firefox
-				return document.defaultView.getComputedStyle(el, "")[cssprop]
-			else //try and get inline style
-				return el.style[cssprop]
-		}
+			if (el.currentStyle) {//IE
+				return el.currentStyle[cssprop];
+			} else if (document.defaultView && document.defaultView.getComputedStyle) { //Firefox
+				return document.defaultView.getComputedStyle(el, "")[cssprop];
+			} else { //try and get inline style
+				return el.style[cssprop];
+			}
+		};
 
 		// вставить html, выполнить css и script или получить весь html, если html не передан
 		var html = function(el, html) {
@@ -951,20 +1047,22 @@ Infra.ext(function() {
 		}
 
 /*
- * Вставляет слой на страницу.
+ * Вставляет html в DOM-узел на странице.
  *
- * @param {Object} layer Слой, который нужно вставить.
+ * @param {Object} node DOM-узел в который нужно вставить html.
+ * @param {String} html для вставки.
  */
-		infra.pasteLayer = function(layer) {
-			var node = layer.node;
+		infra.pasteNode = function(node, htmlString) {
 			if (node.length) {
 				for (var n=0, ll=node.length; n<ll; n++) {
-					html(node[n], layer.html)
+					html(node[n], htmlString)
 				}
-			} else html(node, layer.html)
-		}
-	}
-	Infra.ext(pasteLayer)
+			} else {
+				html(node, htmlString);
+			}
+		};
+	};
+	Infra.ext(pasteLayer);
 })();
 (function() {
 	var layer = function() {
@@ -975,15 +1073,16 @@ Infra.ext(function() {
 			layer.show = false; // отметка что слой скрыт
 			layer.status = 'hidden'; // убираем из цикла
 			if (layer.childs) {
-				for (var i = layer.childs.length; --i >= 0;) {
+				var i = layer.childs.length;
+				for (; --i >= 0;) {
 					hideLayer(layer.childs[i]);
 				}
 			}
+			// очищаем место слоя
 			if (infra.existLayerNode(layer.node)) {
-				layer.html = '';
-				infra.pasteLayer(layer);
+				infra.pasteNode(layer.node, '');
 			}
-		}
+		};
 /*
  * Проверяет равенство узлов.
  *
@@ -992,8 +1091,8 @@ Infra.ext(function() {
  * @return {Boolean} Возвращает **true** если узлы равны.
  */
 		infra.eqLayerNodes = function(node1, node2) {
-			if (node1 == node2) return true
-		}
+			if (node1 == node2) { return true; }
+		};
 		// Скрыть слои которые замещает переданный слой, убрать их из цикла
 		//
 		// Правила:
@@ -1003,7 +1102,8 @@ Infra.ext(function() {
 		var hideLayers = function(layer) {
 			// если слой-родитель скрывается, то все его дети уже не могут показаться, за исключением текущего и его потомков
 			//layer.node = infra.getLayerNode(layer); // есть
-			for (var i = infra.layers.length; --i >= 0;) {
+			var i;
+			for (i = infra.layers.length; --i >= 0;) {
 				if (infra.layers[i].show) {
 					infra.layers[i].node = infra.getLayerNode(infra.layers[i]);
 					// или такой же или посмотреть есть ли node слоя в текущем слое
@@ -1012,7 +1112,7 @@ Infra.ext(function() {
 					}
 				}
 			}
-		}
+		};
 		// Загрузиться и вставиться
 		//
 		// даже если слой не сможет загрузить свои данные, он не может не показаться, какие бы ошибки в нем не были,
@@ -1036,23 +1136,23 @@ Infra.ext(function() {
 											infra.log.debug('check interrupt 2');
 											cb();
 										} else {
-											infra.pasteLayer(layer);
+											infra.pasteNode(layer.node, layer.htmlString);
 											layer.show = true;
 											layer.onshow(cb);
 										}
 									});
-							} else cb()
-						})
-					})
+							} else { cb(); }
+						});
+					});
 				}
-			}, 1)
-		}
+			}, 1);
+		};
 		infra.on('layer', function(layer, num, layers_length) {
 			if (infra.circle.state) {
 				if (infra.circle.first) {
 					layer.status = 'queue'; // в первом круге все помещаем в очередь
 					// совпавшее состояние слоя, может быть не полностью равным infra.circle.state
-					var re = new RegExp('^'+layer.state,'im')
+					var re = new RegExp('^'+layer.state,'im');
 					layer.reg_state = infra.circle.state.match(re);
 				}
 				// Пойти на проверки, вернуть в очередь
@@ -1060,12 +1160,12 @@ Infra.ext(function() {
 					// Изменить условия проверок для других слоев, занимаем тэги
 					infra.circle.occupied[layer.tag] = layer;
 					// Скрыть и убрать из цикла те слои, которые будут замещены вставленным слоем
-					if (!layer.show) hideLayers(layer); // этот слой может быть показан с прошлого infra.check
+					if (!layer.show) { hideLayers(layer); } // этот слой может быть показан с прошлого infra.check
 					// Вставиться
 					infra.circle.loading++; // отправит infra.check в бесконечный цикл, пока не закончится insert
 					insert(layer, function() {
 						infra.circle.loading--; // выведет infra.check из бесконечного цикла
-					})
+					});
 				}
 				// Если слой показан, и не прошел проверки, но ни один другой слой его не скрыл, слой все равно должен скрыться
 				if (layer.show && (layer.status == 'queue')) {
@@ -1077,11 +1177,12 @@ Infra.ext(function() {
 			} else {
 				infra.log.info('no set circle.state');
 			}
-		})
-	}
-	Infra.ext(layer)
+		});
+	};
+if (typeof(window) != 'undefined') { Infra.ext(layer); }
+if (typeof(window) == 'undefined') { module.exports = layer; }
 })();
-(function(){
+(function() {
 	var external = function() {
 		var infra = this;
 		infra.on('external', function(layer, cb) {
@@ -1101,98 +1202,110 @@ Infra.ext(function() {
 							infra.compile(layer._ext, function() {
 								layer._ext = infra.layers;
 								infra.layers = layers;
-								// переопределить слой
-								for (var prop in layer._ext[0]) if (layer._ext[0].hasOwnProperty(prop)) {
-									if (!layer[prop]) layer[prop] = layer._ext[0][prop];
+								// обновить конфиг
+								// TODO: это сделать рекурсивно и все вынести в функции
+								if (layer.config && layer._ext[0].config) {
+									var param; for (param in layer._ext[0].config) { if (layer._ext[0].config.hasOwnProperty(param)) {
+										if (!layer.config[param]) { layer.config[param] = layer._ext[0].config[param]; }
+									}}
 								}
+								// переопределить слой
+								var prop; for (prop in layer._ext[0]) { if (layer._ext[0].hasOwnProperty(prop)) {
+									if (!layer[prop]) {
+										layer[prop] = layer._ext[0][prop];
+									}
+								}}
 								// обновить события
 								var eList = ['onload', 'oncheck', 'onshow'];
-								for (var i = 0, len = eList.length; i < len; i++) {
-									var prop = eList[i];
-									(function(prop){
+								var i, len; for (i = 0, len = eList.length; i < len; i++) {
+									(function(prop) {
 										var value = layer['_'+prop];
 										if (value) {
 											layer[prop] = function(cb) {
 												try {
 													value.call(layer, cb);
-												} catch (e) {
+												} catch(e) {
 													infra.log.error(prop + ' ' +e);
 													cb();
 												}
-											}
+											};
 										}
-									})(prop);
-								}
-								// обновить конфиг
-								if (layer.config && layer._ext[0].config) {
-									for (var param in layer._ext[0].config) if (layer._ext[0].config.hasOwnProperty(param)) {
-										if (!layer.config[param]) layer.config[param] = layer._ext[0].config[param]
-									}
+									})(eList[i]);
 								}
 								// добавить новые
-								var len = layer._ext.length;
+								len = layer._ext.length;
 								if (len) {
 									var num = infra.layers.indexOf(layer);
-									for (var i = 1; i < len; i++) {
+									for (i = 1; i < len; i++) {
 										num++;
 										infra.layers.splice(num, 0, layer._ext[i]);
 									}
 								}
 								cb();
-							})
+							});
 						} catch(e) {
 							infra.log.error('wrong ext', layer.ext);
 							cb();
-						};
-					} else cb();
-				})
-			} else cb();
-		})
-	}
-		Infra.ext(external)
+						}
+					} else { cb(); }
+				});
+			} else { cb(); }
+		});
+	};
+if (typeof(window) != 'undefined') { Infra.ext(external); }
+if (typeof(window) == 'undefined') { module.exports = external; }
 })();
 (function(){
 	var template = function() {
 		var infra = this;
 		var setData = function(layer, cb) {
-			if (layer._data) cb();
-			else {
-				layer._data = {};
-				if (layer.data) {
-					infra.load.json(layer.data, function(err, json) {
-						if (!err) layer._data = json;
-						cb()
-					})
-				} else cb();
+			if (layer.data) { // данные уже загружены
+				cb();
+			} else {
+				layer.data = {};
+				if (layer.json) { // если есть путь для загрузки
+					infra.load.json(layer.json, function(err, data) {
+						if (!err) {
+							layer.data = data;
+						}
+						cb();
+					});
+				} else {
+					cb();
+				}
 			}
 		};
-		var setHtml = function(layer, cb){
+		var setHtml = function(layer, cb) {
 			layer.onload(function() { // все данные загружены
-				if (typeof(layer._tpl) === 'string') {
-					// передаем конфиг слоя в шаблон тоже в качестве переменной config в контексте
-					if (layer._data) layer._data.config = layer.config;
-					infra.parsetpl(layer._tpl, layer._data, function(html) {
-						layer.html = html;
-						cb()
-					})
+				if (typeof(layer.tplString) === 'string') {
+					infra.parsetpl(layer.tplString, layer, function(htmlString) {
+						layer.htmlString = htmlString;
+						cb();
+					});
 				} else {
-					infra.log.error('Wrong _tpl ' + layer.tpl);
-					layer.html = ' ';
-					cb()
+					infra.log.error('Wrong tplString ' + layer.tpl);
+					layer.htmlString = ' ';
+					cb();
 				}
-			})
+			});
 		};
 		var setTemplate = function(layer, cb) {
-			if (!layer._tpl) {
-				layer._tpl = ' ';
+			if (!layer.tplString) {
+				layer.tplString = ' ';
 				if (layer.tpl) {
 					infra.load(layer.tpl, function(err, txt) {
-						if (!err) layer._tpl = txt;
+						if (!err) {
+							layer.tplString = txt;
+						}
 						cb();
-					})
-				} else cb();
-			} else cb();
-		}
+					});
+				} else {
+					cb();
+				}
+			} else {
+				cb();
+			}
+		};
 /*
  * Разбирает строку шаблона.
  *
@@ -1202,28 +1315,31 @@ Infra.ext(function() {
  */
 		infra.parsetpl = function(html, ctx, callback) {
 			callback(Mustache.to_html(html, ctx));
-		}
+		};
 		infra.on('insert', function(layer, cb) {
 			// Правило: Слои здесь точно скрыты
 			var counter = 2;
 			var parse = function() {
-				if (-- counter == 0) {
+				if (-- counter === 0) {
 					setHtml(layer, function() { // распарсить
 						cb();
-					})
+					});
 				}
-			}
+			};
 			if (!layer.html) {
 				setTemplate(layer, function() { // загрузить шаблон
 					parse();
-				})
+				});
 				setData(layer, function() { // загрузить данные
 					parse();
-				})
-			} else cb();
-		})
-	}
-		Infra.ext(template)
+				});
+			} else {
+				cb();
+			}
+		});
+	};
+if (typeof(window) != 'undefined') { Infra.ext(template); }
+if (typeof(window) == 'undefined') { module.exports = template; }
 })();
 Infra.ext(function() { // Расширение позволяющие сборке работать со ссылками
 	var infra = this;
@@ -1237,25 +1353,26 @@ Infra.ext(function() { // Расширение позволяющие сборк
  * @return {String} Отформатированный вариант состояния.
  */
 	infra.getState = function(pathname) {
-		if (!pathname) pathname = '/';
+		if (!pathname) { pathname = '/'; }
 		var now_location = decodeURIComponent(location.pathname);
 		pathname = decodeURIComponent(pathname);
 		pathname = pathname.replace(/#.+/,''); // убрать location.hash
-		if (pathname[0] != '/') pathname = now_location + '/' + pathname;
+		if (pathname[0] != '/') { pathname = now_location + '/' + pathname; }
 		//if (pathname.slice(-1) != '/') pathname = pathname + '/'; // добавить последний слэш если его нет
 		pathname = pathname.replace(/\/{2,}/g,"\/"); // заменять двойные слэши
 		return pathname;
-	}
+	};
 
 	// Поиск родительской ссылки
 	var parent_a = function(targ) {
 		if (targ.nodeName == 'A') {
-			return targ
+			return targ;
 		} else {
-			if ((!targ.parentNode) || (targ.parentNode == 'HTML')) return false;
-			else return parent_a(targ.parentNode);
+			if ((!targ.parentNode) || (targ.parentNode == 'HTML')) {
+				return false;
+			} else { return parent_a(targ.parentNode); }
 		}
-	}
+	};
 
 	// Обработчик для ссылок
 	var handler = function(e) {
@@ -1376,23 +1493,25 @@ Infra.ext(function() {
  *
  * @return {Undefined}
  */
+	var empty = function(){};
 	infra.set.cache = function() {
 		infra.load.cache = Infra.server.cache;
-		for (var i = infra.layers.length; --i >= 0;) {
+		var i;
+		for (i = infra.layers.length; --i >= 0;) {
 			var layer = infra.layers[i];
 			layer.show = Infra.server.showns[i];
 			if (layer.show) {
 				// КЭШ
-				if (!layer._data && layer.data && infra.load.cache.json[layer.data]) {
-					layer._data = infra.load.cache.json[layer.data];
+				if (!layer.data && layer.json && infra.load.cache.data[layer.json]) {
+					layer.data = infra.load.cache.data[layer.json];
 				}
-				if (!layer.html && !layer._tpl && layer.tpl && infra.load.cache.text[layer.tpl]) {
-					layer._tpl = infra.load.cache.text[layer.tpl];
+				if (!layer.htmlString && !layer.tplString && layer.tpl && infra.load.cache.text[layer.tpl]) {
+					layer.tplString = infra.load.cache.text[layer.tpl];
 				}
 				layer.reg_state = infra.state.match(new RegExp('^'+layer.state,'im'));
 				// Событие показа
 				try {
-					layer.onshow.bind(layer)(function(){});
+					layer.onshow.bind(layer)(empty);
 				} catch (e) {
 					infra.log.error('onshow() ' + i + ' ' + e);
 				}
@@ -1400,7 +1519,7 @@ Infra.ext(function() {
 		}
 		//var infra_server_cache = document.getElementById('infra_server_cache');
 		//infra_server_cache.parentNode.removeChild(infra_server_cache);
-	}
+	};
 });
 (function() { // Вспомогательные средства для работы со слоями
 	var tools = function() {
@@ -1411,24 +1530,24 @@ Infra.ext(function() {
  * @param {Object} layer Слой, который будет перепарсен.
  */
 		infra.reparseLayer = function(layer) {
-			if (layer.data) layer._data = '';
-			if (layer.tpl) {
-				layer._tpl = '';
-				layer.html = '';
-			} else if (layer._tpl) {
-				layer.html = '';
-			}
 			layer.show = false;
-			if (layer.childs) {
-				for (var l in layer.childs) if (layer.childs.hasOwnProperty(l)) {
-					//infra.reparseLayer(layer.childs[l]);
-					layer.childs[l].show = false;
-				}
+			// если есть данные для загрузки, убрать данные сохраненные у слоя
+			if (layer.json) {
+				layer.data = false;
 			}
-			if (layer.tags) {
-				for (var l in layer.tags) if (layer.tags.hasOwnProperty(l)) {
-					//infra.reparseLayer(layer.tags[l]);
-					layer.tags[l].show = false;
+			// если есть шаблон для загрузки, убрать текст сохраненный у слоя
+			if (layer.tpl) {
+				layer.tplString = '';
+				layer.htmlString = '';
+			} else if (layer.tplString) {
+				layer.htmlString = '';
+			}
+			// если есть наследники, то скрыть их и показать заново
+			if (layer.childs) {
+				var i = layer.childs.length;
+				for (; --i >= 0;) {
+					//infra.reparseLayer(layer.childs[l]);
+					layer.childs[i].show = false;
 				}
 			}
 		};
@@ -1438,7 +1557,8 @@ Infra.ext(function() {
  * @return {Undefined}
  */
 		infra.reparseAll = function() {
-			for (var i = infra.layers.length; --i >= 0;) {
+			var i = infra.layers.length;
+			for (; --i >= 0;) {
 				infra.reparseLayer(infra.layers[i]);
 			}
 		};
@@ -1495,5 +1615,7 @@ Infra.ext(function() {
 			} else _checkExists(state, cb);
 		}
 	}
+if (typeof(window) != 'undefined')
 	Infra.ext(tools);
+if (typeof(window) == 'undefined') module.exports = tools
 })();

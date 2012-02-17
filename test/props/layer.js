@@ -1,27 +1,60 @@
 window.exports = {};
 window.layer = exports;
 
-exports.test_layer = function(test) {
+exports.test_bad_layer = function(test) {
+	test.expect(2);
 	var infra = Infra.init();
 	infra.index = {
-		html: '<div id="base_text"></div>',
+		HTML: 'adf',
+		tag: '#base_html',
+		label: 'error_layer wow',
+		id: '213'
+	};
+	infra.state = '/';
+	infra.once('end', function() {
+		test.equal(infra.labels.wow[0].status, 'wrong insert', 'labels');
+		test.equal(infra.ids['213'], infra.layers[0], 'ids');
+		test.done();
+	});
+	infra.check();
+}
+
+exports.test_layer = function(test) {
+	test.expect(1);
+	var infra = Infra.init();
+	infra.index = {
+		htmlString: '<div id="base_text"></div>',
+		tag: '#base_html',
+	};
+	infra.state = '/';
+	infra.once('end', function() {
+		test.equal(infra.ids.length, infra.layers[0].length, 'ids length');
+		test.done();
+	});
+	infra.check();
+}
+
+exports.test_layer2 = function(test) {
+	var infra = Infra.init();
+	infra.index = {
+		htmlString: '<div id="base_text"></div>',
 		tag: '#base_html',
 		tags: {
 			'#base_text': { // здесь будет добавлен слэш
-				html: '<div id="base_left"></div>',
+				htmlString: '<div id="base_left"></div>',
 				states: {
 					'Страницы': {
 						tag: '#base_left',
-						html: 'state1 ok'
+						htmlString: 'state1 ok'
 					},
 					'Галерея': {
 						tag: '#base_left',
-						html: 'state2 ok'
+						htmlString: 'state2 ok'
 					}
 				}
 			},
 			'#noid': {
-				html: '123'
+				htmlString: '123'
 			}
 		}
 	};

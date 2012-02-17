@@ -11,7 +11,7 @@ window.browsers = {
 		} else if (infra.browser.chrome) {
 			test.ok(infra.browser.chrome, 'chrome');
 		} else {
-			test.ok(true, 'unknown')
+			test.ok(true, 'unknown');
 		}
 		test.done();
 	}

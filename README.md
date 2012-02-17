@@ -17,9 +17,6 @@
 ### layer.state = 'state'
 Состояние при котором слой должен показаться, задается в виде строки регулярного выражения, по-умолчанию равно '/'.
 
-### layer.html = '/path/to/html/file.html'
-Путь для загрузки html данных слоя.
-
 ### layer.css = '/path/to/style.css'
 Путь для загрузки CSS-стилей слоя.
 
@@ -81,8 +78,11 @@
 Данные так же хранятся в `infra.load.cache['/path/to/json/data.json'].data`
 Загружаются и парсятся из файла определенного в `layer.json`.
 
-### layer.htmlString = 'htmlString'
-Текстовые данные для вставки в дом.
+### layer.tplString = '<p>{{tplString}}</p>'
+Текстовый шаблон для вставки в дом.
+
+### layer.htmlString = '<p>htmlString</p>'
+Текстовые распарсенные шаблонные данные для вставки в дом.
 
 ### layer.node = [NodeList] || {HTMLElement}
 DOM-узел или узлы, куда вставиться слой.

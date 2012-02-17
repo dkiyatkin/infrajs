@@ -3,20 +3,14 @@
 	var compile = function() {
 		var infra = this;
 		infra.labels = {};
-		infra.ids = {};
-		var id = 0;
-		this.on('compile', function(layer, prop, value) {
-			if (!layer.state) {
-				layer.state = '/'; // устанавливаем общий state всем слоям
-			}
-			if (!layer.id) {
-				layer.id = id++;
-				infra.ids[layer.id] = layer;
-			}
-			var oneprops = ['tag','state', 'html', 'css', 'json', 'tpl', 'label', 'ext', 'config', 'data', 'htmlString', 'id'];
+		infra.on('compile', function(layer, prop, value) {
+			var oneprops = ['tag','state', 'css', 'json', 'tpl', 'label', 'ext', 'config', 'data', 'tplString', 'htmlString', 'id'];
 			if (oneprops.indexOf(prop) != -1) {
-				if (this.layers.indexOf(layer) == -1) {
-					this.layers.push(layer);
+				if (infra.layers.indexOf(layer) == -1) {
+					if (!layer.state) {
+						layer.state = '/'; // устанавливаем общий state всем слоям
+					}
+					infra.layers.push(layer);
 				}
 				if (prop == 'config' || prop == 'data') { // объекты
 					if (Object.prototype.toString.apply(value) === '[object Object]') {
@@ -35,9 +29,6 @@
 								}
 								infra.labels[labels[i]].push(layer);
 							}
-						}
-						if (prop == 'id') {
-							infra.ids[prop] = layer;
 						}
 					} else {
 						infra.log.error('bad value', prop, value);

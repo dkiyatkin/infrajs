@@ -7,24 +7,24 @@
  * @param {Object} layer Слой, который будет перепарсен.
  */
 		infra.reparseLayer = function(layer) {
-			if (layer.data) layer._data = '';
-			if (layer.tpl) {
-				layer._tpl = '';
-				layer.html = '';
-			} else if (layer._tpl) {
-				layer.html = '';
-			}
 			layer.show = false;
-			if (layer.childs) {
-				for (var l in layer.childs) if (layer.childs.hasOwnProperty(l)) {
-					//infra.reparseLayer(layer.childs[l]);
-					layer.childs[l].show = false;
-				}
+			// если есть данные для загрузки, убрать данные сохраненные у слоя
+			if (layer.json) {
+				layer.data = false;
 			}
-			if (layer.tags) {
-				for (var l in layer.tags) if (layer.tags.hasOwnProperty(l)) {
-					//infra.reparseLayer(layer.tags[l]);
-					layer.tags[l].show = false;
+			// если есть шаблон для загрузки, убрать текст сохраненный у слоя
+			if (layer.tpl) {
+				layer.tplString = '';
+				layer.htmlString = '';
+			} else if (layer.tplString) {
+				layer.htmlString = '';
+			}
+			// если есть наследники, то скрыть их и показать заново
+			if (layer.childs) {
+				var i = layer.childs.length;
+				for (; --i >= 0;) {
+					//infra.reparseLayer(layer.childs[l]);
+					layer.childs[i].show = false;
 				}
 			}
 		};
@@ -34,7 +34,8 @@
  * @return {Undefined}
  */
 		infra.reparseAll = function() {
-			for (var i = infra.layers.length; --i >= 0;) {
+			var i = infra.layers.length;
+			for (; --i >= 0;) {
 				infra.reparseLayer(infra.layers[i]);
 			}
 		};

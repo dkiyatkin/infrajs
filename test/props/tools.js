@@ -25,15 +25,15 @@ exports.checkExists = function(test) {
 			tags: {
 				'#header': {
 					tpl: '/infra/layers/header.tpl',
-					childs: {
+					states: {
 						'bla': {
-							html: '123',
+							htmlString: '123',
 							tag: '#one'
 						}
 					}
 				}
 			}
-		}
+		};
 	});
 	var infra = Infra.init();
 	infra.checkExists('/', function(exist) {
@@ -43,7 +43,7 @@ exports.checkExists = function(test) {
 			infra.checkExists('/no/', function(exist) {
 				test.ok(!exist, 'state3');
 				test.done();
-			})
-		})
-	})
-}
+			});
+		});
+	});
+};

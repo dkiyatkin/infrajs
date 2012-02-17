@@ -7,14 +7,14 @@
 			layer.show = false; // отметка что слой скрыт
 			layer.status = 'hidden'; // убираем из цикла
 			if (layer.childs) {
-				var i;
-				for (i = layer.childs.length; --i >= 0;) {
+				var i = layer.childs.length;
+				for (; --i >= 0;) {
 					hideLayer(layer.childs[i]);
 				}
 			}
+			// очищаем место слоя
 			if (infra.existLayerNode(layer.node)) {
-				layer.htmlString = '';
-				infra.pasteLayer(layer);
+				infra.pasteNode(layer.node, '');
 			}
 		};
 /*
@@ -65,16 +65,22 @@
 						layer.oncheck(function() { // сработает у всех слоев которые должны быть показаны
 							layer.status = 'insert';
 							if (!layer.show) {
-									infra.emit('insert', layer, function() {
+								infra.emit('insert', layer, function(err) {
+									if (err) {
+										infra.log.error('layer can not be inserted', layer.id);
+										layer.status = 'wrong insert';
+										cb();
+									} else {
 										if (infra.circle.interrupt) {
 											infra.log.debug('check interrupt 2');
 											cb();
 										} else {
-											infra.pasteLayer(layer);
+											infra.pasteNode(layer.node, layer.htmlString);
 											layer.show = true;
 											layer.onshow(cb);
 										}
-									});
+									}
+								});
 							} else { cb(); }
 						});
 					});

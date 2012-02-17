@@ -70,18 +70,18 @@
 		}
 
 /*
- * Вставляет слой на страницу.
+ * Вставляет html в DOM-узел на странице.
  *
- * @param {Object} layer Слой, который нужно вставить.
+ * @param {Object} node DOM-узел в который нужно вставить html.
+ * @param {String} html для вставки.
  */
-		infra.pasteLayer = function(layer) {
-			var node = layer.node;
+		infra.pasteNode = function(node, htmlString) {
 			if (node.length) {
 				for (var n=0, ll=node.length; n<ll; n++) {
-					html(node[n], layer.htmlString)
+					html(node[n], htmlString)
 				}
 			} else {
-				html(node, layer.htmlString);
+				html(node, htmlString);
 			}
 		};
 	};

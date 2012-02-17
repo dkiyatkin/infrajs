@@ -2,44 +2,53 @@
 	var template = function() {
 		var infra = this;
 		var setData = function(layer, cb) {
-			if (layer._data) cb();
-			else {
-				layer._data = {};
-				if (layer.data) {
-					infra.load.json(layer.data, function(err, json) {
-						if (!err) layer._data = json;
-						cb()
-					})
-				} else cb();
+			if (layer.data) { // данные уже загружены
+				cb();
+			} else {
+				layer.data = {};
+				if (layer.json) { // если есть путь для загрузки
+					infra.load.json(layer.json, function(err, data) {
+						if (!err) {
+							layer.data = data;
+						}
+						cb();
+					});
+				} else {
+					cb();
+				}
 			}
 		};
-		var setHtml = function(layer, cb){
+		var setHtml = function(layer, cb) {
 			layer.onload(function() { // все данные загружены
-				if (typeof(layer._tpl) === 'string') {
-					// передаем конфиг слоя в шаблон тоже в качестве переменной config в контексте
-					if (layer._data) layer._data.config = layer.config;
-					infra.parsetpl(layer._tpl, layer._data, function(html) {
-						layer.html = html;
-						cb()
-					})
+				if (typeof(layer.tplString) === 'string') {
+					infra.parsetpl(layer.tplString, layer, function(htmlString) {
+						layer.htmlString = htmlString;
+						cb();
+					});
 				} else {
-					infra.log.error('Wrong _tpl ' + layer.tpl);
-					layer.html = ' ';
-					cb()
+					infra.log.error('Wrong tplString ' + layer.tpl);
+					layer.htmlString = ' ';
+					cb();
 				}
-			})
+			});
 		};
 		var setTemplate = function(layer, cb) {
-			if (!layer._tpl) {
-				layer._tpl = ' ';
+			if (!layer.tplString) {
+				layer.tplString = ' ';
 				if (layer.tpl) {
 					infra.load(layer.tpl, function(err, txt) {
-						if (!err) layer._tpl = txt;
+						if (!err) {
+							layer.tplString = txt;
+						}
 						cb();
-					})
-				} else cb();
-			} else cb();
-		}
+					});
+				} else {
+					cb();
+				}
+			} else {
+				cb();
+			}
+		};
 /*
  * Разбирает строку шаблона.
  *
@@ -49,28 +58,31 @@
  */
 		infra.parsetpl = function(html, ctx, callback) {
 			callback(Mustache.to_html(html, ctx));
-		}
+		};
 		infra.on('insert', function(layer, cb) {
 			// Правило: Слои здесь точно скрыты
 			var counter = 2;
 			var parse = function() {
-				if (-- counter == 0) {
+				if (-- counter === 0) {
 					setHtml(layer, function() { // распарсить
 						cb();
-					})
+					});
 				}
-			}
-			if (!layer.html) {
+			};
+			if (layer.htmlString) {
+				cb();
+			} else if (layer.tpl || layer.tplString) {
 				setTemplate(layer, function() { // загрузить шаблон
 					parse();
-				})
+				});
 				setData(layer, function() { // загрузить данные
 					parse();
-				})
-			} else cb();
-		})
-	}
-if (typeof(window) != 'undefined')
-		Infra.ext(template)
-if (typeof(window) == 'undefined') module.exports = template
+				});
+			} else {
+				cb(1);
+			}
+		});
+	};
+if (typeof(window) != 'undefined') { Infra.ext(template); }
+if (typeof(window) == 'undefined') { module.exports = template; }
 })();
