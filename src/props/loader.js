@@ -32,11 +32,15 @@ Infra.ext(function() {
  *		infra.loader.show() // показать лоадер
  *		infra.loader.hide() // скрыть лоадер
  */
-	infra.loader = Loader();
-	infra.on('start', function() {
-		infra.loader.show();
-	});
-	infra.on('end', function() {
-		infra.loader.hide();
-	});
+	if (!infra.set) { infra.set = {}; }
+	infra.set.loader = function(src) {
+		infra.loader.src = src;
+		infra.loader = Loader();
+		infra.on('start', function() {
+			infra.loader.show();
+		});
+		infra.on('end', function() {
+			infra.loader.hide();
+		});
+	};
 });
