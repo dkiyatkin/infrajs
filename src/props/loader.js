@@ -30,7 +30,6 @@ Infra.ext(function() {
  */
 	infra.set = {};
 	infra.set.loader = function(src) {
-		if (src) { infra.loader.src = src; }
 /*
  * Объект позволяющий управлять графическим индикатором загрузки.
  *
@@ -39,6 +38,7 @@ Infra.ext(function() {
  *		infra.loader.hide() // скрыть лоадер
  */
 		infra.loader = Loader();
+		if (src) { infra.loader.src = src; }
 		infra.on('start', function() {
 			infra.loader.show();
 		});
