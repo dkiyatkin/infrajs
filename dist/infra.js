@@ -1505,7 +1505,7 @@ Infra.ext(function() {
  * @return {Undefined}
  */
 	var empty = function(){};
-	infra.set.cache = function() {
+	var getCache = function() {
 		infra.load.cache = Infra.server.cache;
 		var i;
 		for (i = infra.layers.length; --i >= 0;) {
@@ -1530,6 +1530,15 @@ Infra.ext(function() {
 		}
 		//var infra_server_cache = document.getElementById('infra_server_cache');
 		//infra_server_cache.parentNode.removeChild(infra_server_cache);
+	};
+	infra.set.cache = function() {
+		infra.once('start', function() {
+			try {
+				getCache();
+			} catch(e) { // можно открыть просто index.html
+				infra.log.warning('fail cache');
+			}
+		});
 	};
 });
 (function() { // Вспомогательные средства для работы со слоями
@@ -1651,4 +1660,7 @@ Infra.ext(function() { // Расширение позволяющие сборк
 			document.title = infra.title;
 		});
 	};
+});
+Infra.ext(function() {
+	var infra = this;
 });
