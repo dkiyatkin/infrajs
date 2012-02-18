@@ -277,19 +277,26 @@ Infra.ext(function() {
 		};
 	};
 /*
+ * Объект содержит дополнительные опции сборки.
+ */
+	infra.set = {};
+	infra.set.loader = function(src) {
+		if (src) { infra.loader.src = src; }
+/*
  * Объект позволяющий управлять графическим индикатором загрузки.
  *
  * Примеры:
  *		infra.loader.show() // показать лоадер
  *		infra.loader.hide() // скрыть лоадер
  */
-	infra.loader = Loader();
-	infra.on('start', function() {
-		infra.loader.show();
-	});
-	infra.on('end', function() {
-		infra.loader.hide();
-	});
+		infra.loader = Loader();
+		infra.on('start', function() {
+			infra.loader.show();
+		});
+		infra.on('end', function() {
+			infra.loader.hide();
+		});
+	};
 });
 (function() {
 	var load = function () {
@@ -594,6 +601,15 @@ if (typeof(window) == 'undefined') { module.exports = load; }
 				infra.compile(infra.index, function() {
 					cb();
 				});
+				// установить id слоям
+				infra.ids = {};
+				var i; for (i = infra.layers.length; --i >= 0;) {
+					var layer = infra.layers[i];
+					if (!layer.id) {
+						layer.id = i;
+					}
+					infra.ids[layer.id] = layer;
+				}
 			} else {
 				cb();
 			}
@@ -690,20 +706,14 @@ if (typeof(window) == 'undefined') { module.exports = setCheck; }
 	var compile = function() {
 		var infra = this;
 		infra.labels = {};
-		infra.ids = {};
-		var id = 0;
-		this.on('compile', function(layer, prop, value) {
-			if (!layer.state) {
-				layer.state = '/'; // устанавливаем общий state всем слоям
-			}
-			if (!layer.id) {
-				layer.id = id++;
-				infra.ids[layer.id] = layer;
-			}
+		infra.on('compile', function(layer, prop, value) {
 			var oneprops = ['tag','state', 'css', 'json', 'tpl', 'label', 'ext', 'config', 'data', 'tplString', 'htmlString', 'id'];
 			if (oneprops.indexOf(prop) != -1) {
-				if (this.layers.indexOf(layer) == -1) {
-					this.layers.push(layer);
+				if (infra.layers.indexOf(layer) == -1) {
+					if (!layer.state) {
+						layer.state = '/'; // устанавливаем общий state всем слоям
+					}
+					infra.layers.push(layer);
 				}
 				if (prop == 'config' || prop == 'data') { // объекты
 					if (Object.prototype.toString.apply(value) === '[object Object]') {
@@ -722,9 +732,6 @@ if (typeof(window) == 'undefined') { module.exports = setCheck; }
 								}
 								infra.labels[labels[i]].push(layer);
 							}
-						}
-						if (prop == 'id') {
-							infra.ids[prop] = layer;
 						}
 					} else {
 						infra.log.error('bad value', prop, value);
@@ -1131,7 +1138,12 @@ if (typeof(window) == 'undefined') { module.exports = checkLayer; }
 						layer.oncheck(function() { // сработает у всех слоев которые должны быть показаны
 							layer.status = 'insert';
 							if (!layer.show) {
-									infra.emit('insert', layer, function() {
+								infra.emit('insert', layer, function(err) {
+									if (err) {
+										infra.log.error('layer can not be inserted', layer.id);
+										layer.status = 'wrong insert';
+										cb();
+									} else {
 										if (infra.circle.interrupt) {
 											infra.log.debug('check interrupt 2');
 											cb();
@@ -1140,7 +1152,8 @@ if (typeof(window) == 'undefined') { module.exports = checkLayer; }
 											layer.show = true;
 											layer.onshow(cb);
 										}
-									});
+									}
+								});
 							} else { cb(); }
 						});
 					});
@@ -1326,7 +1339,9 @@ if (typeof(window) == 'undefined') { module.exports = external; }
 					});
 				}
 			};
-			if (!layer.html) {
+			if (layer.htmlString) {
+				cb();
+			} else if (layer.tpl || layer.tplString) {
 				setTemplate(layer, function() { // загрузить шаблон
 					parse();
 				});
@@ -1334,7 +1349,7 @@ if (typeof(window) == 'undefined') { module.exports = external; }
 					parse();
 				});
 			} else {
-				cb();
+				cb(1);
 			}
 		});
 	};
@@ -1416,10 +1431,6 @@ Infra.ext(function() { // Расширение позволяющие сборк
 		}
 	}
 
-/*
- * Объект содержит дополнительные опции сборки.
- */
-	infra.set = {};
 /*
  * Подмена всех ссылок и осуществление переходов по страницам.
  *
@@ -1619,3 +1630,25 @@ if (typeof(window) != 'undefined')
 	Infra.ext(tools);
 if (typeof(window) == 'undefined') module.exports = tools
 })();
+Infra.ext(function() { // Расширение позволяющие сборке работать со ссылками
+	var infra = this;
+	infra.set.title = function(titleObj) {
+		var not_found = titleObj['404'];
+		var main = titleObj.main;
+		var sub = titleObj.sub;
+		infra.on('start', function() {
+			infra.status_code = 200;
+		});
+		infra.on('end', function() {
+			if (infra.status_code == 404) {
+				infra.title = not_found;
+			} else if (infra.state === '/') {
+				infra.title = main;
+			} else {
+				infra.title = infra.state.replace(/\/+$/, '').replace(/^\/+/, '').split('/').reverse().join(' / ') + sub;
+			}
+			infra.last_status_code = infra.status_code;
+			document.title = infra.title;
+		});
+	};
+});

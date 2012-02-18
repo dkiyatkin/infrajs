@@ -26,15 +26,18 @@ Infra.ext(function() {
 		};
 	};
 /*
+ * Объект содержит дополнительные опции сборки.
+ */
+	infra.set = {};
+	infra.set.loader = function(src) {
+		if (src) { infra.loader.src = src; }
+/*
  * Объект позволяющий управлять графическим индикатором загрузки.
  *
  * Примеры:
  *		infra.loader.show() // показать лоадер
  *		infra.loader.hide() // скрыть лоадер
  */
-	if (!infra.set) { infra.set = {}; }
-	infra.set.loader = function(src) {
-		infra.loader.src = src;
 		infra.loader = Loader();
 		infra.on('start', function() {
 			infra.loader.show();
