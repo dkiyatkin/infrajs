@@ -10,6 +10,7 @@
 					if (!layer.state) {
 						layer.state = '/'; // устанавливаем общий state всем слоям
 					}
+					if (!layer.config) { layer.config = {}; }
 					infra.layers.push(layer);
 				}
 				if (prop == 'config' || prop == 'data') { // объекты

@@ -713,6 +713,7 @@ if (typeof(window) == 'undefined') { module.exports = setCheck; }
 					if (!layer.state) {
 						layer.state = '/'; // устанавливаем общий state всем слоям
 					}
+					if (!layer.config) { layer.config = {}; }
 					infra.layers.push(layer);
 				}
 				if (prop == 'config' || prop == 'data') { // объекты
@@ -1660,7 +1661,4 @@ Infra.ext(function() { // Расширение позволяющие сборк
 			document.title = infra.title;
 		});
 	};
-});
-Infra.ext(function() {
-	var infra = this;
 });
