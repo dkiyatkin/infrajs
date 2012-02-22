@@ -3,6 +3,7 @@ if (typeof(window) == 'undefined') {
 	var Infra = require('../../src/core.js');
 	Infra.ext(require('../../src/props/logger.js'));
 	Infra.ext(require('../../src/props/events.js'));
+	Infra.ext(require('../../src/props/check.js'));
 } else {
 	window.exports = {};
 	window.events = exports;
@@ -43,4 +44,26 @@ exports.test_once_event_and_listeners2 = function(test) {
 	});
 	test.equal(listeners.length, 1, 'length once listeners1');
 	infra.emit('test_once_event2');
+};
+exports.test_on_check_event = function(test) {
+	var infra = Infra.init();
+	infra.index = {};
+	test.expect(5);
+	infra.once('end', function() {
+		test.ok(true, 'queue1');
+	});
+	infra.once('end', function() {
+		test.ok(true, 'queue2');
+	});
+	infra.once('end', function() {
+		test.ok(true, 'queue3');
+	});
+	infra.once('end', function() {
+		test.ok(true, 'queue4');
+	});
+	infra.once('end', function() {
+		test.ok(true, 'queue5');
+		test.done();
+	});
+	infra.check();
 };

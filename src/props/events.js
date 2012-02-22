@@ -61,6 +61,7 @@
 							if (pos > -1) {
 								_del_listeners[name].splice(pos,1);
 								_listeners[name].splice(i,1);
+								i--;
 							}
 						}
 						emitter.apply(this, args);
