@@ -69,7 +69,7 @@
 
 		var _checkExists = function(state, cb) {
 			var exist;
-			for (var i = infra.layers.length; --i >= 0;) {
+			var i; for (i = infra.layers.length; --i >= 0;) {
 				exist = new RegExp('^'+infra.layers[i].state+'$').test(state);
 				if (exist) {
 					//console.log(state, infra.layers[i].state);
@@ -77,7 +77,7 @@
 				}
 			}
 			cb(exist);
-		}
+		};
 /*
  * Проверяет, существуют ли check при переданном состоянии.
  *
@@ -88,11 +88,46 @@
 			if (!infra.layers.length) {
 				infra.compile(infra.index, function() {
 					_checkExists(state, cb);
-				})
-			} else _checkExists(state, cb);
-		}
-	}
-if (typeof(window) != 'undefined')
+				});
+			} else {
+				_checkExists(state, cb);
+			}
+		};
+/*
+ * Заменяет шаблонные данные в параметрах слоя.
+ * oncheck-функция.
+ *
+ * @param {Function} cb Callback-функция.
+ * @param {Object} layer, слой если не передан, то будет считаться значением в this.
+ */
+		infra.oncheckTplOptions = function(cb, layer) {
+			if (!layer) { layer = this; }
+			var counter = 0;
+			var _cb = function(data) {
+				layer[prop] = data;
+				if (-- counter ) { cb(); }
+			};
+			var props = ['json', 'ext', 'tpl'];
+			var i;
+			var prop;
+			for (i = props.length; --i >= 0;) {
+				prop = props[i];
+				if (layer[prop]) {
+					counter++;
+				}
+			}
+			for (i = props.length; --i >= 0;) {
+				prop = props[i];
+				if (layer[prop]) {
+					infra.parsetpl(layer[prop], layer, _cb);
+				}
+			}
+		};
+	};
+if (typeof(window) != 'undefined') {
 	Infra.ext(tools);
-if (typeof(window) == 'undefined') module.exports = tools
+}
+if (typeof(window) == 'undefined') {
+	module.exports = tools;
+}
 })();

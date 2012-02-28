@@ -17,14 +17,14 @@ exports.test_bad_layer = function(test) {
 		test.done();
 	});
 	infra.check();
-}
+};
 
 exports.test_layer = function(test) {
 	test.expect(1);
 	var infra = Infra.init();
 	infra.index = {
 		htmlString: '<div id="base_text"></div>',
-		tag: '#base_html',
+		tag: '#base_html'
 	};
 	infra.state = '/';
 	infra.once('end', function() {
@@ -32,7 +32,7 @@ exports.test_layer = function(test) {
 		test.done();
 	});
 	infra.check();
-}
+};
 
 exports.test_layer2 = function(test) {
 	var infra = Infra.init();
