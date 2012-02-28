@@ -102,26 +102,20 @@
  */
 		infra.oncheckTplOptions = function(cb, layer) {
 			if (!layer) { layer = this; }
-			var counter = 0;
-			var _cb = function(data) {
-				layer[prop] = data;
-				if (-- counter ) { cb(); }
+			var counter = 2;
+			var _cb = function() {
+				if ( -- counter === 0 ) {
+					cb();
+				}
 			};
-			var props = ['json', 'ext', 'tpl'];
-			var i;
-			var prop;
-			for (i = props.length; --i >= 0;) {
-				prop = props[i];
-				if (layer[prop]) {
-					counter++;
-				}
-			}
-			for (i = props.length; --i >= 0;) {
-				prop = props[i];
-				if (layer[prop]) {
-					infra.parsetpl(layer[prop], layer, _cb);
-				}
-			}
+			infra.parsetpl(layer.tpl, layer, function(data) {
+				layer.tpl = data;
+				_cb();
+			});
+			infra.parsetpl(layer.json, layer, function(data) {
+				layer.json = data;
+				_cb();
+			});
 		};
 	};
 if (typeof(window) != 'undefined') {
