@@ -43,6 +43,9 @@
 			}
 		});
 	};
-if (typeof(window) != 'undefined') { Infra.ext(compile); }
-if (typeof(window) == 'undefined') { module.exports = compile; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.compile = compile;
+	} else {
+		Infra.ext(compile);
+	}
 })();

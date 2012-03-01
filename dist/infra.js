@@ -55,7 +55,14 @@ var Infra = {
 		};
 	}
 };
-if (typeof(window) == 'undefined') { Infra.init = function() { return { layers: [] }; }; module.exports = Infra; }
+if (typeof module !== "undefined" && module.exports) {
+	Infra.init = function() {
+		return {
+			layers: []
+		};
+	};
+	module.exports = Infra;
+}
 (function() {
 	Infra.ext(function() {
 		var infra = this;
@@ -132,7 +139,7 @@ var Logger = function() {
 		}
 	};
 };
-var newLogger = function() {
+var logger = function() {
 	var infra = this;
 /*
  * Предоставляет интерфейс управления отладочными сообщениями.
@@ -148,11 +155,10 @@ var newLogger = function() {
  */
 	infra.log = Logger();
 };
-if (typeof(window) !== 'undefined') {
-	Infra.ext(newLogger);
-}
-if (typeof(window) === 'undefined') {
-	module.exports = newLogger;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports.logger = logger;
+} else {
+	Infra.ext(logger);
 }
 })();
 (function() {
@@ -247,8 +253,11 @@ if (typeof(window) === 'undefined') {
 		};
 		//this._listeners = _listeners;
 	};
-if (typeof(window) != 'undefined') { Infra.ext(events); }
-if (typeof(window) == 'undefined') { module.exports = events; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.events = events;
+	} else {
+		Infra.ext(events);
+	}
 })();
 Infra.ext(function() {
 	var infra = this;
@@ -548,8 +557,11 @@ Infra.ext(function() {
 			}
 		};
 	};
-if (typeof(window) != 'undefined') { Infra.ext(load); }
-if (typeof(window) == 'undefined') { module.exports = load; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.load = load;
+	} else {
+		Infra.ext(load);
+	}
 })();
 (function() {
 	var setCheck = function() {
@@ -699,8 +711,13 @@ if (typeof(window) == 'undefined') { module.exports = load; }
 			}
 		});
 	};
-if (typeof(window) != 'undefined') { Infra.ext(setCheck); }
-if (typeof(window) == 'undefined') { module.exports = setCheck; }
+
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.setCheck = setCheck;
+	} else {
+		Infra.ext(setCheck);
+	}
+
 })();
 (function() {
 	var empty = function(cb) { cb(); };
@@ -764,8 +781,11 @@ if (typeof(window) == 'undefined') { module.exports = setCheck; }
 			}
 		});
 	};
-if (typeof(window) != 'undefined') { Infra.ext(compile); }
-if (typeof(window) == 'undefined') { module.exports = compile; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.compile = compile;
+	} else {
+		Infra.ext(compile);
+	}
 })();
 (function() {
 	var compile = function() {
@@ -812,8 +832,11 @@ if (typeof(window) == 'undefined') { module.exports = compile; }
 			}
 		});
 	};
-if (typeof(window) != 'undefined') { Infra.ext(compile); }
-if (typeof(window) == 'undefined') { module.exports = compile; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.compile = compile;
+	} else {
+		Infra.ext(compile);
+	}
 })();
 (function() {
 	var checkLayer = function() {
@@ -981,8 +1004,11 @@ if (typeof(window) == 'undefined') { module.exports = compile; }
 			} else { return true; }
 		};
 	};
-if (typeof(window) != 'undefined') { Infra.ext(checkLayer); }
-if (typeof(window) == 'undefined') { module.exports = checkLayer; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.checkLayer = checkLayer;
+	} else {
+		Infra.ext(checkLayer);
+	}
 })();
 (function() {
 	var pasteLayer = function() {
@@ -1194,8 +1220,11 @@ if (typeof(window) == 'undefined') { module.exports = checkLayer; }
 			}
 		});
 	};
-if (typeof(window) != 'undefined') { Infra.ext(layer); }
-if (typeof(window) == 'undefined') { module.exports = layer; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.layer = layer;
+	} else {
+		Infra.ext(layer);
+	}
 })();
 (function() {
 	var external = function() {
@@ -1267,8 +1296,11 @@ if (typeof(window) == 'undefined') { module.exports = layer; }
 			} else { cb(); }
 		});
 	};
-if (typeof(window) != 'undefined') { Infra.ext(external); }
-if (typeof(window) == 'undefined') { module.exports = external; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.external = external;
+	} else {
+		Infra.ext(external);
+	}
 })();
 (function(){
 	var template = function() {
@@ -1355,8 +1387,11 @@ if (typeof(window) == 'undefined') { module.exports = external; }
 			}
 		});
 	};
-if (typeof(window) != 'undefined') { Infra.ext(template); }
-if (typeof(window) == 'undefined') { module.exports = template; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.template = template;
+	} else {
+		Infra.ext(template);
+	}
 })();
 Infra.ext(function() { // Расширение позволяющие сборке работать со ссылками
 	var infra = this;
@@ -1663,12 +1698,11 @@ Infra.ext(function() {
 			});
 		};
 	};
-if (typeof(window) != 'undefined') {
-	Infra.ext(tools);
-}
-if (typeof(window) == 'undefined') {
-	module.exports = tools;
-}
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.tools = tools;
+	} else {
+		Infra.ext(tools);
+	}
 })();
 Infra.ext(function() { // Расширение позволяющие сборке работать со ссылками
 	var infra = this;

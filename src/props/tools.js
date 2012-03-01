@@ -118,10 +118,9 @@
 			});
 		};
 	};
-if (typeof(window) != 'undefined') {
-	Infra.ext(tools);
-}
-if (typeof(window) == 'undefined') {
-	module.exports = tools;
-}
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.tools = tools;
+	} else {
+		Infra.ext(tools);
+	}
 })();

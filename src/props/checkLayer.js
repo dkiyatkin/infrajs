@@ -164,6 +164,9 @@
 			} else { return true; }
 		};
 	};
-if (typeof(window) != 'undefined') { Infra.ext(checkLayer); }
-if (typeof(window) == 'undefined') { module.exports = checkLayer; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.checkLayer = checkLayer;
+	} else {
+		Infra.ext(checkLayer);
+	}
 })();

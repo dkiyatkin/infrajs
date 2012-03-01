@@ -38,7 +38,7 @@ var Logger = function() {
 		}
 	};
 };
-var newLogger = function() {
+var logger = function() {
 	var infra = this;
 /*
  * Предоставляет интерфейс управления отладочными сообщениями.
@@ -54,10 +54,9 @@ var newLogger = function() {
  */
 	infra.log = Logger();
 };
-if (typeof(window) !== 'undefined') {
-	Infra.ext(newLogger);
-}
-if (typeof(window) === 'undefined') {
-	module.exports = newLogger;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports.logger = logger;
+} else {
+	Infra.ext(logger);
 }
 })();

@@ -247,6 +247,9 @@
 			}
 		};
 	};
-if (typeof(window) != 'undefined') { Infra.ext(load); }
-if (typeof(window) == 'undefined') { module.exports = load; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.load = load;
+	} else {
+		Infra.ext(load);
+	}
 })();

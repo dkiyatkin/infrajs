@@ -146,6 +146,11 @@
 			}
 		});
 	};
-if (typeof(window) != 'undefined') { Infra.ext(setCheck); }
-if (typeof(window) == 'undefined') { module.exports = setCheck; }
+
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.setCheck = setCheck;
+	} else {
+		Infra.ext(setCheck);
+	}
+
 })();

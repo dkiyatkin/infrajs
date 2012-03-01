@@ -1,6 +1,6 @@
 if (typeof(window) == 'undefined') {
 	var Infra = require('../../src/core.js');
-	Infra.ext(require('../../src/props/logger.js'));
+	Infra.ext(require('../../src/props/logger.js').logger);
 } else {
 	window.exports = {};
 	window.logger = exports;

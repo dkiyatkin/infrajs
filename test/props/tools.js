@@ -1,16 +1,16 @@
 if (typeof(window) == 'undefined') {
 	var prefix = '../../src/';
 	var Infra = require(prefix + 'core.js');
-	Infra.ext(require(prefix + 'props/logger.js'));
-	Infra.ext(require(prefix + 'props/events.js'));
-	Infra.ext(require(prefix + 'props/load.js'));
-	Infra.ext(require(prefix + 'props/check.js'));
-	Infra.ext(require(prefix + 'props/compile1lvl.js'));
-	Infra.ext(require(prefix + 'props/compile2lvl.js'));
-	Infra.ext(require(prefix + 'props/checkLayer.js'));
-	Infra.ext(require(prefix + 'props/layer.js'));
-	Infra.ext(require(prefix + 'props/template.js'));
-	Infra.ext(require(prefix + 'props/tools.js'));
+	Infra.ext(require(prefix + 'props/logger.js').logger);
+	Infra.ext(require(prefix + 'props/events.js').events);
+	Infra.ext(require(prefix + 'props/load.js').load);
+	Infra.ext(require(prefix + 'props/check.js').setCheck);
+	Infra.ext(require(prefix + 'props/compile1lvl.js').compile);
+	Infra.ext(require(prefix + 'props/compile2lvl.js').compile);
+	Infra.ext(require(prefix + 'props/checkLayer.js').checkLayer);
+	Infra.ext(require(prefix + 'props/layer.js').layer);
+	Infra.ext(require(prefix + 'props/template.js').template);
+	Infra.ext(require(prefix + 'props/tools.js').tools);
 } else {
 	window.exports = {};
 	window.tools = exports;

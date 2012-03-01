@@ -119,6 +119,9 @@
 			}
 		});
 	};
-if (typeof(window) != 'undefined') { Infra.ext(layer); }
-if (typeof(window) == 'undefined') { module.exports = layer; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.layer = layer;
+	} else {
+		Infra.ext(layer);
+	}
 })();

@@ -68,6 +68,9 @@
 			} else { cb(); }
 		});
 	};
-if (typeof(window) != 'undefined') { Infra.ext(external); }
-if (typeof(window) == 'undefined') { module.exports = external; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.external = external;
+	} else {
+		Infra.ext(external);
+	}
 })();

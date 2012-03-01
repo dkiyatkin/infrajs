@@ -55,4 +55,11 @@ var Infra = {
 		};
 	}
 };
-if (typeof(window) == 'undefined') { Infra.init = function() { return { layers: [] }; }; module.exports = Infra; }
+if (typeof module !== "undefined" && module.exports) {
+	Infra.init = function() {
+		return {
+			layers: []
+		};
+	};
+	module.exports = Infra;
+}

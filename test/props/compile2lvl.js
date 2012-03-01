@@ -1,10 +1,10 @@
 if (typeof(window) == 'undefined') {
 	var Infra = require('../../src/core.js');
-	Infra.ext(require('../../src/props/logger.js'));
-	Infra.ext(require('../../src/props/events.js'));
-	Infra.ext(require('../../src/props/check.js'));
-	Infra.ext(require('../../src/props/compile1lvl.js'));
-	Infra.ext(require('../../src/props/compile2lvl.js'));
+	Infra.ext(require('../../src/props/logger.js').logger);
+	Infra.ext(require('../../src/props/events.js').events);
+	Infra.ext(require('../../src/props/check.js').setCheck);
+	Infra.ext(require('../../src/props/compile1lvl.js').compile);
+	Infra.ext(require('../../src/props/compile2lvl.js').compile);
 } else {
 	window.exports = {};
 	window.compile2lvl = exports;

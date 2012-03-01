@@ -1,9 +1,9 @@
 /* Проверка работы событий */
 if (typeof(window) == 'undefined') {
 	var Infra = require('../../src/core.js');
-	Infra.ext(require('../../src/props/logger.js'));
-	Infra.ext(require('../../src/props/events.js'));
-	Infra.ext(require('../../src/props/check.js'));
+	Infra.ext(require('../../src/props/logger.js').logger);
+	Infra.ext(require('../../src/props/events.js').events);
+	Infra.ext(require('../../src/props/check.js').setCheck);
 } else {
 	window.exports = {};
 	window.events = exports;

@@ -90,6 +90,9 @@
 		};
 		//this._listeners = _listeners;
 	};
-if (typeof(window) != 'undefined') { Infra.ext(events); }
-if (typeof(window) == 'undefined') { module.exports = events; }
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.events = events;
+	} else {
+		Infra.ext(events);
+	}
 })();
