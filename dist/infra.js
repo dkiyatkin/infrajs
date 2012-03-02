@@ -157,10 +157,11 @@ var logger = function() {
  */
 	infra.log = Logger();
 };
+if (typeof Infra !== "undefined") {
+	Infra.ext(logger);
+}
 if (typeof module !== "undefined" && module.exports) {
 	module.exports.logger = logger;
-} else {
-	Infra.ext(logger);
 }
 })();
 (function() {
@@ -255,10 +256,11 @@ if (typeof module !== "undefined" && module.exports) {
 		};
 		//this._listeners = _listeners;
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(events);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.events = events;
-	} else {
-		Infra.ext(events);
 	}
 })();
 Infra.ext(function() {
@@ -559,10 +561,11 @@ Infra.ext(function() {
 			}
 		};
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(load);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.load = load;
-	} else {
-		Infra.ext(load);
 	}
 })();
 (function() {
@@ -714,10 +717,11 @@ Infra.ext(function() {
 		});
 	};
 
+	if (typeof Infra !== "undefined") {
+		Infra.ext(setCheck);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.setCheck = setCheck;
-	} else {
-		Infra.ext(setCheck);
 	}
 
 })();
@@ -783,10 +787,11 @@ Infra.ext(function() {
 			}
 		});
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(compile);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.compile = compile;
-	} else {
-		Infra.ext(compile);
 	}
 })();
 (function() {
@@ -834,10 +839,11 @@ Infra.ext(function() {
 			}
 		});
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(compile);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.compile = compile;
-	} else {
-		Infra.ext(compile);
 	}
 })();
 (function() {
@@ -1006,10 +1012,11 @@ Infra.ext(function() {
 			} else { return true; }
 		};
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(checkLayer);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.checkLayer = checkLayer;
-	} else {
-		Infra.ext(checkLayer);
 	}
 })();
 (function() {
@@ -1222,10 +1229,11 @@ Infra.ext(function() {
 			}
 		});
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(layer);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.layer = layer;
-	} else {
-		Infra.ext(layer);
 	}
 })();
 (function() {
@@ -1298,10 +1306,11 @@ Infra.ext(function() {
 			} else { cb(); }
 		});
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(external);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.external = external;
-	} else {
-		Infra.ext(external);
 	}
 })();
 (function(){
@@ -1389,10 +1398,11 @@ Infra.ext(function() {
 			}
 		});
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(template);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.template = template;
-	} else {
-		Infra.ext(template);
 	}
 })();
 Infra.ext(function() { // Расширение позволяющие сборке работать со ссылками
@@ -1700,10 +1710,11 @@ Infra.ext(function() {
 			});
 		};
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(tools);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.tools = tools;
-	} else {
-		Infra.ext(tools);
 	}
 })();
 Infra.ext(function() { // Расширение позволяющие сборке работать со ссылками

@@ -164,9 +164,10 @@
 			} else { return true; }
 		};
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(checkLayer);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.checkLayer = checkLayer;
-	} else {
-		Infra.ext(checkLayer);
 	}
 })();

@@ -68,9 +68,10 @@
 			} else { cb(); }
 		});
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(external);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.external = external;
-	} else {
-		Infra.ext(external);
 	}
 })();

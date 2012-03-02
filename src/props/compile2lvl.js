@@ -43,9 +43,10 @@
 			}
 		});
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(compile);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.compile = compile;
-	} else {
-		Infra.ext(compile);
 	}
 })();

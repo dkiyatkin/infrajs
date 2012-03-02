@@ -147,10 +147,11 @@
 		});
 	};
 
+	if (typeof Infra !== "undefined") {
+		Infra.ext(setCheck);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.setCheck = setCheck;
-	} else {
-		Infra.ext(setCheck);
 	}
 
 })();

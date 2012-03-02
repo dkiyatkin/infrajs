@@ -54,9 +54,10 @@ var logger = function() {
  */
 	infra.log = Logger();
 };
+if (typeof Infra !== "undefined") {
+	Infra.ext(logger);
+}
 if (typeof module !== "undefined" && module.exports) {
 	module.exports.logger = logger;
-} else {
-	Infra.ext(logger);
 }
 })();

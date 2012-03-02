@@ -83,9 +83,10 @@
 			}
 		});
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(template);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.template = template;
-	} else {
-		Infra.ext(template);
 	}
 })();

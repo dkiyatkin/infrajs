@@ -90,9 +90,10 @@
 		};
 		//this._listeners = _listeners;
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(events);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.events = events;
-	} else {
-		Infra.ext(events);
 	}
 })();

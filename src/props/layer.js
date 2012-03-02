@@ -119,9 +119,10 @@
 			}
 		});
 	};
+	if (typeof Infra !== "undefined") {
+		Infra.ext(layer);
+	}
 	if (typeof module !== "undefined" && module.exports) {
 		module.exports.layer = layer;
-	} else {
-		Infra.ext(layer);
 	}
 })();
