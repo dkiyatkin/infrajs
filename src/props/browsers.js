@@ -1,3 +1,4 @@
+if (typeof window !== "undefined") {
 (function() {
 	Infra.ext(function() {
 		var infra = this;
@@ -34,3 +35,4 @@
 		this.browser.safari = (this.browser.webkit && !this.browser.chrome);
 	});
 })();
+}

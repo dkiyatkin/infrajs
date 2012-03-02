@@ -63,6 +63,7 @@ if (typeof module !== "undefined" && module.exports) {
 	};
 	module.exports = Infra;
 }
+if (typeof window !== "undefined") {
 (function() {
 	Infra.ext(function() {
 		var infra = this;
@@ -99,6 +100,7 @@ if (typeof module !== "undefined" && module.exports) {
 		this.browser.safari = (this.browser.webkit && !this.browser.chrome);
 	});
 })();
+}
 (function() {
 var Logger = function() {
 	var loggers = ['ERROR', 'WARNING', 'INFO', 'DEBUG'];
