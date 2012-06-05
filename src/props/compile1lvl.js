@@ -4,7 +4,7 @@
 		var infra = this;
 		infra.labels = {};
 		infra.on('compile', function(layer, prop, value) {
-			var oneprops = ['tag','state', 'css', 'json', 'tpl', 'label', 'ext', 'config', 'data', 'tplString', 'htmlString', 'id'];
+			var oneprops = ['tag', 'div', 'state', 'css', 'json', 'tpl', 'label', 'ext', 'config', 'data', 'tplString', 'htmlString', 'id'];
 			if (oneprops.indexOf(prop) != -1) {
 				if (infra.layers.indexOf(layer) == -1) {
 					if (!layer.state) {
@@ -21,7 +21,11 @@
 					}
 				} else { // строки
 					if (Object.prototype.toString.apply(value) === '[object String]') {
-						layer[prop] = value;
+						if (prop == 'div') {
+							layer.tag = '#'+value;
+						} else {
+							layer[prop] = value;
+						}
 						if (prop == 'label') {
 							var labels = value.replace(/^\s+|\s+$/g,'').split(' ');
 							var i; for (i = labels.length; --i >= 0;) {
