@@ -735,7 +735,7 @@ Infra.ext(function() {
 		var infra = this;
 		infra.labels = {};
 		infra.on('compile', function(layer, prop, value) {
-			var oneprops = ['tag','state', 'css', 'json', 'tpl', 'label', 'ext', 'config', 'data', 'tplString', 'htmlString', 'id'];
+			var oneprops = ['tag', 'div', 'state', 'css', 'json', 'tpl', 'label', 'ext', 'config', 'data', 'tplString', 'htmlString', 'id'];
 			if (oneprops.indexOf(prop) != -1) {
 				if (infra.layers.indexOf(layer) == -1) {
 					if (!layer.state) {
@@ -752,7 +752,11 @@ Infra.ext(function() {
 					}
 				} else { // строки
 					if (Object.prototype.toString.apply(value) === '[object String]') {
-						layer[prop] = value;
+						if (prop == 'div') {
+							layer.tag = '#'+value;
+						} else {
+							layer[prop] = value;
+						}
 						if (prop == 'label') {
 							var labels = value.replace(/^\s+|\s+$/g,'').split(' ');
 							var i; for (i = labels.length; --i >= 0;) {
@@ -770,6 +774,10 @@ Infra.ext(function() {
 		});
 		this.on('compile', function(layer, prop, value) {
 			if (prop == 'onload' || prop == 'onshow' || prop == 'oncheck') {
+				if (infra.functions && (Object.prototype.toString.apply(value) === '[object String]') &&
+						infra.functions[value]) {
+					value = infra.functions[value];
+				}
 				layer['_'+prop] = value;
 				layer[prop] = function(cb) {
 					try {
@@ -802,7 +810,7 @@ Infra.ext(function() {
 	var compile = function() {
 		var infra = this;
 		infra.on('compile', function(layer, prop, value) {
-			if (prop == 'states' || prop == 'tags') {
+			if (prop == 'states' || prop == 'tags' || prop == 'divs') {
 				if (Object.prototype.toString.apply(value) === '[object Object]') {
 					if (infra.layers.indexOf(layer) == -1) { infra.layers.push(layer); }
 					if (!layer.childs) { layer.childs = []; }
@@ -823,8 +831,13 @@ Infra.ext(function() {
 									child_layer.state = child_layer.parent.state + state + '/';
 								}
 								layer.states[child_layer.state] = child_layer;
-							} else if (prop == 'tags') {
-								var tag = key;
+							} else {
+								var tag;
+								if (prop == 'tags') {
+									tag = key;
+								} else {
+									tag = '#'+key;
+								}
 								child_layer.tag = tag; // тэги не прибавляются как state у childs
 								child_layer.state = layer.state; // state наследуется как у родителя
 								layer.tags[child_layer.tag] = child_layer;

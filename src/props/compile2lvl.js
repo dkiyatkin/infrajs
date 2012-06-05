@@ -2,7 +2,7 @@
 	var compile = function() {
 		var infra = this;
 		infra.on('compile', function(layer, prop, value) {
-			if (prop == 'states' || prop == 'tags') {
+			if (prop == 'states' || prop == 'tags' || prop == 'divs') {
 				if (Object.prototype.toString.apply(value) === '[object Object]') {
 					if (infra.layers.indexOf(layer) == -1) { infra.layers.push(layer); }
 					if (!layer.childs) { layer.childs = []; }
@@ -23,8 +23,13 @@
 									child_layer.state = child_layer.parent.state + state + '/';
 								}
 								layer.states[child_layer.state] = child_layer;
-							} else if (prop == 'tags') {
-								var tag = key;
+							} else {
+								var tag;
+								if (prop == 'tags') {
+									tag = key;
+								} else {
+									tag = '#'+key;
+								}
 								child_layer.tag = tag; // тэги не прибавляются как state у childs
 								child_layer.state = layer.state; // state наследуется как у родителя
 								layer.tags[child_layer.tag] = child_layer;
