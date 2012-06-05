@@ -7,7 +7,7 @@
 					if (infra.layers.indexOf(layer) == -1) { infra.layers.push(layer); }
 					if (!layer.childs) { layer.childs = []; }
 					if ((prop == 'states') && !layer.states) { layer.states = {}; }
-					if ((prop == 'tags') && !layer.tags) { layer.tags = {}; }
+					if ((prop == 'tags' || prop == 'divs') && !layer.tags) { layer.tags = {}; }
 					var key;
 					for (key in value) { if (value.hasOwnProperty(key)) {
 						if (Object.prototype.toString.apply(value[key]) === '[object Object]') {
