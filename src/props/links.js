@@ -78,6 +78,7 @@ Infra.ext(function() { // Расширение позволяющие сборк
  *
  * @return {Undefined}
  */
+	if (!infra.set) { infra.set = {}; }
 	infra.set.links = function() {
 		setHrefs();
 		infra.on('start', function() {

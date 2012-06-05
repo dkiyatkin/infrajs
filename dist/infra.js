@@ -263,12 +263,13 @@ if (typeof module !== "undefined" && module.exports) {
 		module.exports.events = events;
 	}
 })();
+if (typeof window !== "undefined") {
 Infra.ext(function() {
 	var infra = this;
+	var html = document.getElementsByTagName('html')[0];
 	var Loader = function() {
 		var loader = document.createElement('img');
-		loader.setAttribute('style', 'display:block;width:30px;height:30px;left:50%;top:50%;position:fixed;margin-left:-15px;margin-top:-15px;');
-		var html = document.getElementsByTagName('html')[0];
+		loader.setAttribute('style', 'z-index:1000;display:block;width:30px;height:30px;left:50%;top:50%;position:fixed;margin-left:-15px;margin-top:-15px;');
 		return {
 			src: '../images/loader.gif',
 			show: function() {
@@ -293,7 +294,7 @@ Infra.ext(function() {
 /*
  * Объект содержит дополнительные опции сборки.
  */
-	infra.set = {};
+	if (!infra.set) { infra.set = {}; }
 	infra.set.loader = function(src) {
 /*
  * Объект позволяющий управлять графическим индикатором загрузки.
@@ -305,13 +306,16 @@ Infra.ext(function() {
 		infra.loader = Loader();
 		if (src) { infra.loader.src = src; }
 		infra.on('start', function() {
+			html.setAttribute('style','cursor:progress');
 			infra.loader.show();
 		});
 		infra.on('end', function() {
+			html.setAttribute('style','cursor:auto');
 			infra.loader.hide();
 		});
 	};
 });
+}
 (function() {
 	var load = function () {
 		var infra = this;
@@ -1485,6 +1489,7 @@ Infra.ext(function() { // Расширение позволяющие сборк
  *
  * @return {Undefined}
  */
+	if (!infra.set) { infra.set = {}; }
 	infra.set.links = function() {
 		setHrefs();
 		infra.on('start', function() {
