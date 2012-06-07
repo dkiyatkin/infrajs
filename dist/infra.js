@@ -621,17 +621,17 @@ Infra.ext(function() {
 			// Если слоев нету в памяти, то собрать их, используя index
 			if (!infra.layers.length) {
 				infra.compile(infra.index, function() {
+					// установить id слоям
+					infra.ids = {};
+					var i; for (i = infra.layers.length; --i >= 0;) {
+						var layer = infra.layers[i];
+						if (!layer.id) {
+							layer.id = i;
+						}
+						infra.ids[layer.id] = layer;
+					}
 					cb();
 				});
-				// установить id слоям
-				infra.ids = {};
-				var i; for (i = infra.layers.length; --i >= 0;) {
-					var layer = infra.layers[i];
-					if (!layer.id) {
-						layer.id = i;
-					}
-					infra.ids[layer.id] = layer;
-				}
 			} else {
 				cb();
 			}
@@ -774,11 +774,11 @@ Infra.ext(function() {
 		});
 		this.on('compile', function(layer, prop, value) {
 			if (prop == 'onload' || prop == 'onshow' || prop == 'oncheck') {
+				layer['_'+prop] = value;
 				if (infra.functions && (Object.prototype.toString.apply(value) === '[object String]') &&
 						infra.functions[value]) {
 					value = infra.functions[value];
 				}
-				layer['_'+prop] = value;
 				layer[prop] = function(cb) {
 					try {
 						value.call(layer, cb);
@@ -1389,7 +1389,8 @@ Infra.ext(function() {
  * @param {Object} callback Callback-функция, один аргумент разобранный шаблон.
  */
 		infra.parsetpl = function(html, ctx, callback) {
-			callback(Mustache.to_html(html, ctx));
+			var res = Mustache.to_html(html, ctx);
+			if (callback) { callback(res); } else { return res; }
 		};
 		infra.on('insert', function(layer, cb) {
 			// Правило: Слои здесь точно скрыты
@@ -1757,3 +1758,27 @@ Infra.ext(function() { // Расширение позволяющие сборк
 		});
 	};
 });
+(function() {
+	var compile = function() {
+		var infra = this;
+		infra.on('compile', function(layer, prop, value) {
+			if (prop == 'jsontpl') {
+				layer[prop] = value;
+			}
+		});
+		infra.once('start', function() {
+			var i; for (i = infra.layers.length; --i >= 0;) {
+				if (infra.layers[i].jsontpl) {
+					infra.layers[i].json = infra.parsetpl(infra.layers[i].jsontpl, infra);
+				}
+			}
+		});
+	};
+
+	if (typeof Infra !== "undefined") {
+		Infra.ext(compile);
+	}
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports.compile = compile;
+	}
+})();

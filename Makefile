@@ -24,6 +24,7 @@ FILES =	${SRC_DIR}/core.js \
 			${SRC_DIR}/props/cache.js \
 			${SRC_DIR}/props/tools.js \
 			${SRC_DIR}/props/title.js \
+			${SRC_DIR}/props/proptpl.js \
 
 INFRA = ${DIST_DIR}/infra.js
 

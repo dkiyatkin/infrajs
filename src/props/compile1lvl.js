@@ -43,11 +43,11 @@
 		});
 		this.on('compile', function(layer, prop, value) {
 			if (prop == 'onload' || prop == 'onshow' || prop == 'oncheck') {
+				layer['_'+prop] = value;
 				if (infra.functions && (Object.prototype.toString.apply(value) === '[object String]') &&
 						infra.functions[value]) {
 					value = infra.functions[value];
 				}
-				layer['_'+prop] = value;
 				layer[prop] = function(cb) {
 					try {
 						value.call(layer, cb);

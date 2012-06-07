@@ -47,17 +47,17 @@
 			// Если слоев нету в памяти, то собрать их, используя index
 			if (!infra.layers.length) {
 				infra.compile(infra.index, function() {
+					// установить id слоям
+					infra.ids = {};
+					var i; for (i = infra.layers.length; --i >= 0;) {
+						var layer = infra.layers[i];
+						if (!layer.id) {
+							layer.id = i;
+						}
+						infra.ids[layer.id] = layer;
+					}
 					cb();
 				});
-				// установить id слоям
-				infra.ids = {};
-				var i; for (i = infra.layers.length; --i >= 0;) {
-					var layer = infra.layers[i];
-					if (!layer.id) {
-						layer.id = i;
-					}
-					infra.ids[layer.id] = layer;
-				}
 			} else {
 				cb();
 			}

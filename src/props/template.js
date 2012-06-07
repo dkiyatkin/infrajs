@@ -57,7 +57,8 @@
  * @param {Object} callback Callback-функция, один аргумент разобранный шаблон.
  */
 		infra.parsetpl = function(html, ctx, callback) {
-			callback(Mustache.to_html(html, ctx));
+			var res = Mustache.to_html(html, ctx);
+			if (callback) { callback(res); } else { return res; }
 		};
 		infra.on('insert', function(layer, cb) {
 			// Правило: Слои здесь точно скрыты
