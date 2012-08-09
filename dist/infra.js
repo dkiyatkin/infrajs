@@ -1738,7 +1738,7 @@ Infra.ext(function() {
 })();
 Infra.ext(function() { // Расширение позволяющие сборке работать со ссылками
 	var infra = this;
-	infra.set.title = function(titleObj) {
+	infra.set.head = function(headObj) {
 		var updateMeta = function(metatags, attr, head) {
 			var update = false;
 			var cnt; for (cnt = 0; cnt < metatags.length; cnt++) {
@@ -1749,7 +1749,7 @@ Infra.ext(function() { // Расширение позволяющие сборк
 						update = true;
 						metatags[cnt].setAttribute("content", infra.meta[attr]);
 					}
-			  	}
+				}
 			}
 			if (!update) { // создаем новый
 				var meta = document.createElement('meta');
@@ -1758,11 +1758,15 @@ Infra.ext(function() { // Расширение позволяющие сборк
 				head.appendChild(meta);
 			}
 		};
+		var titleObj = headObj.title;
+		var metaObj = headObj.meta;
 		var not_found = titleObj['404'];
 		var main = titleObj.main;
 		var sub = titleObj.sub;
 		infra.on('start', function() {
 			infra.meta = {};
+			infra.meta.keywords = metaObj.keywords;
+			infra.meta.description = metaObj.description;
 			infra.status_code = 200;
 			infra.title = false;
 		});
@@ -1782,8 +1786,10 @@ Infra.ext(function() { // Расширение позволяющие сборк
 				// установить метатэги
 				var metatags = document.getElementsByTagName("meta");
 				var head = document.getElementsByTagName('head')[0];
-				if (infra.meta.keywords) { updateMeta(metatags, 'keywords', head); }
-				if (infra.meta.description) { updateMeta(metatags, 'description', head); }
+				if (!infra.meta.keywords) { infra.meta.keywords=''; }
+				if (!infra.meta.description) { infra.meta.description=''; }
+				updateMeta(metatags, 'keywords', head);
+				updateMeta(metatags, 'description', head);
 			}
 		});
 	};
