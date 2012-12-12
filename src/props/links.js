@@ -1,6 +1,6 @@
 Infra.ext(function() { // Расширение позволяющие сборке работать со ссылками
 	var infra = this;
-	var ignore_protocols = ['^mailto:','^http://','^https://','^ftp://','^//'];
+	var ignore_protocols = ['^javascript:','^mailto:','^http://','^https://','^ftp://','^//'];
 /*
  * Возвращает отформатированный вариант состояния.
  *
