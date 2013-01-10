@@ -1,0 +1,56 @@
+{
+  "name": "infrajs",
+  "description": "Javascript web framework for rapid creation high performance websites. Server-side and client-side page generation",
+  "version": "0.0.12",
+  "homepage": "https://github.com/dkiyatkin/infrajs",
+  "author": {
+    "name": "Dmitriy Kiyatkin",
+    "email": "info@dkiyatkin.com",
+    "url": "dkiyatkin.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dkiyatkin/infrajs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dkiyatkin/infrajs/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/dkiyatkin/infrajs/raw/master/LICENSE-MIT"
+    }
+  ],
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.6.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.0rc3",
+    "grunt-jsdoc-plugin": "~0.1.0",
+    "mustache": "~0.7.1",
+    "request": "~2.12.0",
+    "connect": "~2.7.1",
+    "grunt-contrib-uglify": "~0.1.0",
+    "grunt-contrib-concat": "~0.1.1",
+    "grunt-contrib-jshint": "~0.1.0",
+    "grunt-contrib-nodeunit": "~0.1.1",
+    "grunt-contrib-coffee": "~0.3.2",
+    "grunt-coffeelint": "0.0.3",
+    "browserify": "~1.16.6",
+    "nodeunit": "~0.7.4",
+    "super": "~0.2.1"
+  },
+  "dependencies": {
+    "request": ">=2.9.153",
+    "connect": ">=2.0.1",
+    "eventemitter2": "0.4.11"
+  },
+  "keywords": [
+    "framework",
+    "infrajs"
+  ]
+}

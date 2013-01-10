@@ -1,81 +1,98 @@
+<!DOCTYPE html>
 <html>
-	<head>
-		<title>Infrajs tests</title>
-		<script src="../lib/es5-shim/es5-shim.min.js"></script>
+<head>
+	<meta charset="UTF-8">
+	<!--
+	jquery
+	<script src="../lib/jquery/jquery.js"></script>
+	-->
 
-		<script src="../src/core.js"></script>
-		<script src="../src/props/browsers.js"></script>
-		<script src="../src/props/logger.js"></script>
-		<script src="../src/props/events.js"></script>
-		<script src="../src/props/loader.js"></script>
-		<script src="../src/props/load.js"></script>
-		<script src="../src/props/check.js"></script>
-		<script src="../src/props/compile1lvl.js"></script>
-		<script src="../src/props/compile2lvl.js"></script>
-		<script src="../src/props/checkLayer.js"></script>
-		<script src="../src/props/pasteLayer.js"></script>
-		<script src="../src/props/layer.js"></script>
-		<script src="../src/props/external.js"></script>
-		<script src="../src/props/template.js"></script>
-		<script src="../src/props/links.js"></script>
-		<script src="../src/props/addressBar.js"></script>
-		<script src="../src/props/cache.js"></script>
-		<script src="../src/props/tools.js"></script>
-		<!--
-		<script src="../dist/infra.js"></script>
-		-->
+	<!--nodeunit lib-->
+	<script src="../node_modules/nodeunit/examples/browser/nodeunit.js"></script>
+	<style>
+		#base_html { border: 1px solid black; }
+		#nodeunit-tests li { cursor: pointer; }
+		#nodeunit-tests li li { cursor: auto; }
+	</style>
 
-		<script src="../lib/nodeunit/nodeunit.js"></script>
+	<!--Extend for new props-->
+	<script src="../node_modules/super/super.min.js"></script>
+	<!--events-->
+	<script src="../node_modules/eventemitter2/lib/eventemitter2.js"></script>
+	<!--coffee-->
+	<script src="http://jashkenas.github.com/coffee-script/extras/coffee-script.js"> </script>
+	<!--template-->
+	<script src="../node_modules/mustache/mustache.js"></script>
 
-		<script src="core.js"></script>
-		<script src="props/browsers.js"></script>
-		<script src="props/logger.js"></script>
-		<script src="props/events.js"></script>
-		<script src="props/loader.js"></script>
-		<script src="props/load.js"></script>
-		<script src="props/check.js"></script>
-		<script src="props/compile1lvl.js"></script>
-		<script src="props/compile2lvl.js"></script>
-		<script src="props/checkLayer.js"></script>
-		<!--
-		<script src="props/pasteLayer.js"></script>
-		-->
-		<script src="props/layer.js"></script>
-		<!--
-		<script src="props/template.js"></script>
-		<script src="props/links.js"></script>
-		<script src="props/addressBar.js"></script>
-		<script src="props/cache.js"></script>
-		-->
-		<script src="props/tools.js"></script>
-		<style>
-			#nodeunit-tests li { cursor: pointer; }
-			#nodeunit-tests li li { cursor: auto; }
-			#base_html { border: 1px solid black; }
-		</style>
-	</head>
-	<body>
-		<script>
-			nodeunit.run({
-				'core': core,
-				'browsers': browsers,
-				'logger': logger,
-				'events': events,
-				'loader': loader,
-				'load': load,
-				'check': check,
-				'compile1lvl': compile1lvl,
-				'compile2lvl': compile2lvl,
-				'checkLayer': checkLayer,
-				//'pasteLayer': pasteLayer,
-			//'layer': layer,
-				//'template': template,
-				//'links': links,
-				//'addressBar': addressBar,
-				//'cache': cache,
-				'tools': tools,
-			});
-		</script>
-		<div id='base_html'></div>
-	</body>
+	<!--dist-->
+  <!--
+  <script type="text/coffeescript" src="../src/infra.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/events.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/loader.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/load.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/check.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/compile1lvl.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/compile2lvl.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/external.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/template.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/layer.coffee"></script>
+
+  <script type="text/coffeescript" src="../src/props/links.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/addressBar.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/cache.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/tools.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/title.coffee"></script>
+  <script type="text/coffeescript" src="../src/props/proptpl.coffee"></script>
+  -->
+  <!--
+	<script type="text/coffeescript" src="../src/infra.coffee"></script>
+  -->
+	<script src="../dist/infra.min.js"></script>
+
+	<!--unit test-->
+		<!--infra.coffee-->
+	<script type="text/coffeescript" src="core.coffee"></script>
+	<script type="text/coffeescript" src="props/logger.coffee"></script>
+	<script type="text/coffeescript" src="props/selector.coffee"></script>
+		<!--props/events.coffee-->
+	<script type="text/coffeescript" src="props/events.coffee"></script>
+		<!--props/loader.coffee-->
+	<script type="text/coffeescript" src="props/loader.coffee"></script>
+		<!--props/load.coffee-->
+	<script type="text/coffeescript" src="props/load.coffee"></script>
+		<!--props/check.coffee-->
+	<script type="text/coffeescript" src="props/check.coffee"></script>
+		<!--props/compile1lvl.coffee-->
+	<script type="text/coffeescript" src="props/compile1lvl.coffee"></script>
+		<!--props/compile2lvl.coffee-->
+	<script type="text/coffeescript" src="props/compile2lvl.coffee"></script>
+		<!--props/layer.coffee-->
+	<script type="text/coffeescript" src="props/checkLayer.coffee"></script>
+	<script type="text/coffeescript" src="props/layer.coffee"></script>
+
+	<!--unit test run-->
+	<script type="text/coffeescript">
+		nodeunit.run({
+		  core
+		  logger
+		  selector
+		  events
+		  loader
+		  load
+		  check
+		  compile1lvl
+		  compile2lvl
+		  checkLayer
+		  layer
+		})
+	</script>
+</head>
+<body>
+	<h1 id="nodeunit-header"></h1>
+	<h2 id="nodeunit-banner" class="fail"></h2>
+	<h2 id="nodeunit-userAgent"></h2>
+	<ol id="nodeunit-tests"></ol>
+	<p id="nodeunit-testresult"></p>
+	<div id='base_html' style='display:none'>hello world</div>
+</body>
 </html>

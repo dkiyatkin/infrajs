@@ -1,7 +1,0 @@
-#Проверка модулей
-
-##В браузере
-http://localhost/git/infrajs/test/index.html
-
-##В node.js
-Набрать make test находясь на одном уровне с папкой test.
