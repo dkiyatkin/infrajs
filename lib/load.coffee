@@ -8,6 +8,7 @@ url = require 'url'
 request = require 'request'
 
 load = (file, req, callback) ->
+  if not req.headers then req.headers = host: '127.0.0.1'
   path_url = url.parse(encodeURI(file), true)
   path_url.href = path.normalize path_url.href
   unless path_url.host

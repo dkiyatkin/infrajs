@@ -395,7 +395,7 @@
         if (!_this.load.cache.data[path]) {
           return _this.load(path, options, function(err, text) {
             try {
-              _this.load.cache.data[path] = JSON.parse(json);
+              _this.load.cache.data[path] = JSON.parse(text);
             } catch (e) {
               _this.log.error("wrong json data " + path);
             }
@@ -673,6 +673,7 @@
           interrupt: false,
           count: 0,
           occupied: {},
+          loading: 0,
           state: _this.state,
           limit: check_limit,
           queue: check_queue,
@@ -706,31 +707,11 @@
             }
             if (listeners.length > 1) {
               return _this.emit('circle');
-            } else {
+            } else if (!_this.circle.loading) {
               return _this.emit('end');
             }
           }
         }, 1);
-        /*
-              setTimeout =>
-                if @circle.loading-- > 0
-                  i = @circle.length
-                  while --i >= 0
-                    if @layers[i].status is 'queue'
-                      @circle.num = i
-                      @emit 'layer', @layers[i], i
-                  if ++@circle.count >= @circle.limit
-                    @log.warn @circle.limit + ' limit'
-                    @circle.loading = 0
-                  now = Date.now()
-                  if @circle.timeout < (now-@circle.time)
-                    @log.warn @circle.timeout + ' timeout'
-                    @circle.loading = 0
-                  if @circle.loading <= 0
-                    @emit 'end'
-              , 1
-        */
-
       });
       firstCircle = function(cb) {
         var i, re;
@@ -1026,12 +1007,12 @@
       setHtml = function(layer, cb) {
         return layer.onload(function() {
           if (typeof layer.tplString === "string") {
-            return this.tplParser(layer.tplString, layer, function(htmlString) {
+            return _this.tplParser(layer.tplString, layer, function(htmlString) {
               layer.htmlString = htmlString;
               return cb();
             });
           } else {
-            this.log.error("Wrong tplString " + layer.tpl);
+            _this.log.error("Wrong tplString " + layer.tpl);
             layer.htmlString = " ";
             return cb();
           }
@@ -1041,7 +1022,7 @@
         if (!layer.tplString) {
           layer.tplString = " ";
           if (layer.tpl) {
-            return this.load(layer.tpl, function(err, txt) {
+            return _this.load(layer.tpl, function(err, txt) {
               if (!err) {
                 layer.tplString = txt;
               }
@@ -1060,7 +1041,7 @@
         } else {
           layer.data = {};
           if (layer.json) {
-            return this.load.json(layer.json, function(err, data) {
+            return _this.load.json(layer.json, function(err, data) {
               if (!err) {
                 layer.data = data;
               }
@@ -1210,25 +1191,30 @@
             _this.log.debug("check interrupt 1");
             return _this.emit('circle');
           } else {
+            _this.circle.loading++;
             return _this.external(layer, function() {
               return layer.oncheck(function() {
                 layer.status = "insert";
                 if (layer.show) {
+                  _this.circle.loading--;
                   return _this.emit('circle');
                 } else {
                   return _this.insert(layer, function(err) {
                     if (err) {
                       _this.log.error("layer can not be inserted", layer.id);
                       layer.status = "wrong insert";
+                      _this.circle.loading--;
                       return _this.emit('circle');
                     } else {
                       if (_this.circle.interrupt) {
                         _this.log.debug("check interrupt 2");
+                        _this.circle.loading--;
                         return _this.emit('circle');
                       } else {
                         _this.$(layer.tag).innerHTML = layer.htmlString;
                         layer.show = true;
                         return layer.onshow(function() {
+                          _this.circle.loading--;
                           return _this.emit('circle');
                         });
                       }

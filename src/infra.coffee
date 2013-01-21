@@ -275,7 +275,7 @@ class Infra
       if (!@load.cache.data[path])
         @load path, options, (err, text) =>
           try
-            @load.cache.data[path] = JSON.parse(json)
+            @load.cache.data[path] = JSON.parse(text)
           catch e
             @log.error "wrong json data " + path
           cb err, @load.cache.data[path]
@@ -472,7 +472,7 @@ class Infra
         interrupt: false # прерывание
         count: 0 # счетчик, сбрасывается в каждом круге
         occupied: {} # забитые тэги, за определенными слоями
-        #loading: 1 # ассинхронная загрузка
+        loading: 0 # ассинхронная загрузка
         state: @state
         limit: check_limit
         queue: check_queue
@@ -502,29 +502,9 @@ class Infra
             listeners = listeners.splice(1, listeners.length)
           if listeners.length > 1 # появились дополнительные подписчики
             @emit 'circle'
-          else
+          else if not @circle.loading
             @emit 'end'
       , 1
-
-      ###
-      setTimeout =>
-        if @circle.loading-- > 0
-          i = @circle.length
-          while --i >= 0
-            if @layers[i].status is 'queue'
-              @circle.num = i
-              @emit 'layer', @layers[i], i
-          if ++@circle.count >= @circle.limit
-            @log.warn @circle.limit + ' limit'
-            @circle.loading = 0
-          now = Date.now()
-          if @circle.timeout < (now-@circle.time)
-            @log.warn @circle.timeout + ' timeout'
-            @circle.loading = 0
-          if @circle.loading <= 0
-            @emit 'end'
-      , 1
-      ###
 
     firstCircle = (cb) =>
       @check_status = 'run'
@@ -734,8 +714,8 @@ class Infra
         res
     @tplParser = @options.tplParser if @options.tplParser
 
-    setHtml = (layer, cb) ->
-      layer.onload -> # все данные загружены
+    setHtml = (layer, cb) =>
+      layer.onload => # все данные загружены
         if typeof (layer.tplString) is "string"
           @tplParser layer.tplString, layer, (htmlString) ->
             layer.htmlString = htmlString
@@ -745,11 +725,11 @@ class Infra
           layer.htmlString = " "
           cb()
         
-    setTemplate = (layer, cb) ->
+    setTemplate = (layer, cb) =>
       unless layer.tplString
         layer.tplString = " "
         if layer.tpl
-          @load layer.tpl, (err, txt) ->
+          @load layer.tpl, (err, txt) =>
             layer.tplString = txt unless err
             cb()
         else
@@ -757,7 +737,7 @@ class Infra
       else
         cb()
 
-    setData = (layer, cb) ->
+    setData = (layer, cb) =>
       if layer.data # данные уже загружены
         cb()
       else
@@ -869,25 +849,31 @@ class Infra
           @log.debug "check interrupt 1"
           @emit 'circle'
         else
+          @circle.loading++
           @external layer, =>
             layer.oncheck => # сработает у всех слоев которые должны быть показаны
               layer.status = "insert"
               if layer.show
+                @circle.loading--
                 @emit 'circle'
               else
                 @insert layer, (err) =>
                   if err
                     @log.error "layer can not be inserted", layer.id
                     layer.status = "wrong insert"
+                    @circle.loading--
                     @emit 'circle'
                   else
                     if @circle.interrupt
                       @log.debug "check interrupt 2"
+                      @circle.loading--
                       @emit 'circle'
                     else
                       @$(layer.tag).innerHTML = layer.htmlString
                       layer.show = true
-                      layer.onshow => @emit 'circle'
+                      layer.onshow =>
+                        @circle.loading--
+                        @emit 'circle'
 
     @on 'layer', (layer, num) => # Пойти на проверки, забить результаты, запустить изменения (загрузка, показ, скрытие)
       layer.check = test(layer)
