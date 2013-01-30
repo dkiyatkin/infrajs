@@ -7,17 +7,17 @@ path = require 'path'
 url = require 'url'
 request = require 'request'
 
-load = (file, req, callback) ->
-  if not req.headers then req.headers = host: '127.0.0.1'
+load = (file, options, callback) ->
+  if not @headers then @headers = host: '127.0.0.1'
   path_url = url.parse(encodeURI(file), true)
   path_url.href = path.normalize path_url.href
   unless path_url.host
     #path_url.href = path.join(encodeURI(state), path_url.href) unless path_url.href[0] is "/"
-    path_url.href = "http://" + req.headers.host + path_url.href
-  delete (req.headers["accept-encoding"]) # TODO
+    path_url.href = "http://" + @headers.host + path_url.href
+  delete (@headers["accept-encoding"]) # TODO
   #console.log path_url.href
   request
-    headers: req.headers
+    headers: @headers
     url: path_url.href
     timeout: 30000
   , (error, response, body) ->

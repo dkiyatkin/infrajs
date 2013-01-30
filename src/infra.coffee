@@ -52,6 +52,7 @@ class Infra
       @document = @options.document
     else if window?
       @document = window.document
+
     if @options.$
       @$ = @options.$
     else
@@ -150,11 +151,6 @@ class Infra
 
     # Индикатор загрузки
 
-
-    if @options.document
-      @document = @options.document
-    else if window?
-      @document = window.document
     @options.loader = true if Object.keys(@options).indexOf('loader') is -1
     if @options.loader
       loader = false
@@ -339,12 +335,12 @@ class Infra
     @load.css = (code) =>
       return if @load.cache.css[code] #Почему-то если это убрать после нескольких перепарсиваний стили у слоя слетают..
       @load.cache.css[code] = true
-      style = document.createElement("style") #создани style с css
+      style = @document.createElement("style") #создани style с css
       style.type = "text/css"
       if style.styleSheet
         style.styleSheet.cssText = code
       else
-        style.appendChild document.createTextNode(code)
+        style.appendChild @document.createTextNode(code)
       head = @$('head')
       head.insertBefore style, head.lastChild #добавили css на страницу
     @load.style = @load.styles = @load.css
@@ -400,7 +396,7 @@ class Infra
     # Выполнить js
     globalEval = (data) =>
       head = @$('head')
-      script = document.createElement("script")
+      script = @document.createElement("script")
       script.type = "text/javascript"
       script.text = data
       head.insertBefore script, head.firstChild
@@ -408,7 +404,7 @@ class Infra
 
     # Кросс-доменный запрос
     setXDR = (path) =>
-      script = document.createElement("script")
+      script = @document.createElement("script")
       script.type = "text/javascript"
       head = @$('head')
       script.src = path
@@ -514,8 +510,7 @@ class Infra
         i = @circle.length
         while --i >= 0
           @layers[i].status = 'queue' # статус обработки слоя
-          re = new RegExp(@layers[i].state, "im")
-          @layers[i].reg_state = @circle.state.match(re)
+          @layers[i].reg_state = @circle.state.match(new RegExp(@layers[i].state, "im"))
           @layers[i].node = null
         @emit 'circle'
       else
@@ -652,43 +647,43 @@ class Infra
               catch e
                 layer._ext = eval_(data)
               layers = @layers
-              @compile layer._ext, ->
-                layer._ext = @layers
-                @layers = layers
-                # обновить конфиг
-                # TODO: это сделать рекурсивно и все вынести в функции
-                if layer.config and layer._ext[0].config
-                  for own param of layer._ext[0].config
-                    layer.config[param] = layer._ext[0].config[param] unless layer.config[param]
-                # переопределить слой
-                for own prop of layer._ext[0]
-                  layer[prop] = layer._ext[0][prop] unless layer[prop]
-                # обновить события
-                eList = ["onload", "oncheck", "onshow"]
-                i = 0
-                len = eList.length
+              @compile layer._ext
+              layer._ext = @layers
+              @layers = layers
+              # обновить конфиг
+              # TODO: это сделать рекурсивно и все вынести в функции
+              if layer.config and layer._ext[0].config
+                for own param of layer._ext[0].config
+                  layer.config[param] = layer._ext[0].config[param] unless layer.config[param]
+              # переопределить слой
+              for own prop of layer._ext[0]
+                layer[prop] = layer._ext[0][prop] unless layer[prop]
+              # обновить события
+              eList = ["onload", "oncheck", "onshow"]
+              i = 0
+              len = eList.length
+              while i < len
+                ((prop) ->
+                  value = layer["_" + prop]
+                  if value
+                    layer[prop] = (cb) ->
+                      try
+                        value.call layer, cb
+                      catch e
+                        @log.error prop + " " + e
+                        cb()
+                ) eList[i]
+                i++
+              # добавить новые
+              len = layer._ext.length
+              if len
+                num = @layers.indexOf(layer)
+                i = 1
                 while i < len
-                  ((prop) ->
-                    value = layer["_" + prop]
-                    if value
-                      layer[prop] = (cb) ->
-                        try
-                          value.call layer, cb
-                        catch e
-                          @log.error prop + " " + e
-                          cb()
-                  ) eList[i]
+                  num++
+                  @layers.splice num, 0, layer._ext[i]
                   i++
-                # добавить новые
-                len = layer._ext.length
-                if len
-                  num = @layers.indexOf(layer)
-                  i = 1
-                  while i < len
-                    num++
-                    @layers.splice num, 0, layer._ext[i]
-                    i++
-                cb()
+              cb()
             catch e
               @log.error "wrong ext", layer.ext
               cb()
@@ -793,8 +788,10 @@ class Infra
     busyTags = (layer) =>
       layer.node = @$(layer.tag) unless layer.node
       for own tag of @circle.occupied
-        if layer.node and layer.node.length and layer.node.find(@circle.occupied[tag])
-          return true
+        if layer.node and layer.node.length
+          find = layer.node.find(@circle.occupied[tag])
+          if find and find.length isnt 0
+            return true
       return false
 
     # state устраивает или нет
@@ -804,6 +801,9 @@ class Infra
           return true
       return false
 
+    @pasteHTML = (tag, html) =>
+      @$(tag).innerHTML = html
+
     # скрыть слой и всех его потомков
     _hide = (layer) =>
       layer.status = "_hide"
@@ -812,7 +812,7 @@ class Infra
         while --i >= 0
           _hide layer.childs[i]
       # скрыть слой
-      @$(layer.tag).innerHTML = ''
+      @pasteHTML(layer.tag, '')
       layer.show = false # отметка что слой скрыт
       layer.status = 'hidden'
 
@@ -836,7 +836,7 @@ class Infra
             _hide @layers[i]
           else
             find = @$(layer.tag).find(@layers[i].tag)
-            if find and find.length
+            if find and find.length isnt 0
               _hide @layers[i]
           
     # Скрыть и убрать из цикла те слои, которые будут замещены вставленным слоем
@@ -869,7 +869,7 @@ class Infra
                       @circle.loading--
                       @emit 'circle'
                     else
-                      @$(layer.tag).innerHTML = layer.htmlString
+                      @pasteHTML(layer.tag, layer.htmlString)
                       layer.show = true
                       layer.onshow =>
                         @circle.loading--
@@ -991,21 +991,22 @@ class Infra
     if not @options.cache? then @options.cache = false
     # Загружает кэш, вставленный на странице сервером.
 
+    empty2 = ->
     getCache = =>
+      Infra = window.Infra
       @load.cache = Infra.server.cache
       i = @layers.length
       while --i >= 0
         layer = @layers[i]
         layer.show = Infra.server.showns[i]
         if layer.show
-          
           # КЭШ
-          layer.data = @load.cache.data[layer.json]  if not layer.data and layer.json and @load.cache.data[layer.json]
-          layer.tplString = @load.cache.text[layer.tpl]  if not layer.htmlString and not layer.tplString and layer.tpl and @load.cache.text[layer.tpl]
-          layer.reg_state = @state.match(new RegExp("^" + layer.state, "im"))
+          layer.data = @load.cache.data[layer.json] if not layer.data and layer.json and @load.cache.data[layer.json]
+          layer.tplString = @load.cache.text[layer.tpl] if not layer.htmlString and not layer.tplString and layer.tpl and @load.cache.text[layer.tpl]
+          layer.reg_state = @state.match(new RegExp(layer.state, "im"))
           # Событие показа
           try
-            layer.onshow.bind(layer) empty
+            layer.onshow.bind(layer)(empty2)
           catch e
             @log.error "onshow() " + i + " " + e
     
@@ -1079,12 +1080,11 @@ class Infra
     #
     _checkExists = (state, cb) =>
       exist = undefined
-      i = undefined
       i = @layers.length
       while --i >= 0
-        exist = new RegExp("^" + @layers[i].state + "$").test(state)
+        exist = new RegExp(@layers[i].state).test(state)
         #console.log(state, @layers[i].state);
-        break  if exist
+        break if exist
       cb exist
     
     #
@@ -1095,8 +1095,8 @@ class Infra
     #
     @checkExists = (state, cb) =>
       unless @layers.length
-        @compile @index, =>
-          _checkExists state, cb
+        @compile @index
+        _checkExists state, cb
       else
         _checkExists state, cb
 
@@ -1119,68 +1119,52 @@ class Infra
         layer.json = data
         _cb()
 
+    ###
     if not @options.title? then @options.title = true
     ###
-    @set.head = (headObj) =>
-      updateMeta = (metatags, attr, head) =>
-        update = false
-        cnt = undefined
-        cnt = 0
-        while cnt < metatags.length
-          name = metatags[cnt].getAttribute("name")
-          if name
-            name = name.toLowerCase()
-            if name is attr
-              update = true
-              metatags[cnt].setAttribute "content", @meta[attr]
-          cnt++
-        unless update # создаем новый
-          meta = document.createElement("meta")
-          meta.setAttribute "name", attr
-          meta.setAttribute "content", @meta[attr]
-          head.appendChild meta
-
-      titleObj = headObj.title
-      metaObj = headObj.meta
-      not_found = titleObj["404"]
-      main = titleObj.main
-      sub = titleObj.sub
+    @head = (headObj) =>
       @on "start", =>
         @meta = {}
-        @meta.keywords = metaObj.keywords
-        @meta.description = metaObj.description
+        @meta.keywords = headObj.meta.keywords
+        @meta.description = headObj.meta.description
         @status_code = 200
         @title = false
-
       @on "end", =>
-        unless @title # если до этого не определился вручную
+        if not @title # если до этого не определился вручную
           if @status_code is 404
-            @title = not_found
+            @title = headObj.title["404"]
           else if @state is "/"
-            @title = main
+            @title = headObj.title.main
           else
-            @title = @state.replace(/\/+$/, "").replace(/^\/+/, "").split("/").reverse().join(" / ") + sub
+            @title = @state.replace(/\/+$/, "").replace(/^\/+/, "").split("/").reverse().join(" / ") + headObj.title.sub
           @last_status_code = @status_code
-        unless typeof (window) is "undefined" # на сервере title ставится из @title
-          document.title = @title
-          
-          # установить метатэги
-          metatags = document.getElementsByTagName("meta")
-          head = document.getElementsByTagName("head")[0]
-          @meta.keywords = ""  unless @meta.keywords
-          @meta.description = ""  unless @meta.description
-          updateMeta metatags, "keywords", head
-          updateMeta metatags, "description", head
-    ###
-
+        @document.title = @title
+        # установить метатэги
+        @meta.keywords = "" unless @meta.keywords
+        @meta.description = "" unless @meta.description
+        head = @$("head")
+        description = @$("meta[name=description]")
+        keywords = @$("meta[name=keywords]")
+        if (keywords and keywords.length isnt 0)
+          head.removeChild(keywords)
+        if (description and description.length isnt 0)
+          head.removeChild(description)
+        meta = @document.createElement("meta")
+        meta.setAttribute "name", 'description'
+        meta.setAttribute "content", @meta.description
+        head.appendChild meta
+        meta = @document.createElement("meta")
+        meta.setAttribute "name", 'keywords'
+        meta.setAttribute "content", @meta.keywords
+        head.appendChild meta
 
     @on "compile", (layer, prop, value) =>
-      layer[prop] = value  if prop is "jsontpl"
+      layer[prop] = value if prop is "jsontpl"
 
     @once "start", =>
       i = @layers.length
       while --i >= 0
-        @layers[i].json = @parsetpl(@layers[i].jsontpl, @layers[i])  if @layers[i].jsontpl
+        @layers[i].json = @parsetpl(@layers[i].jsontpl, @layers[i]) if @layers[i].jsontpl
 
 if not window?
   module.exports = Infra

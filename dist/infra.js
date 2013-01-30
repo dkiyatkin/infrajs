@@ -24,7 +24,7 @@
   Infra = (function() {
 
     function Infra(options) {
-      var apply, busyTags, check_limit, check_queue, check_timeout, createRequestObject, displace, empty, firstCircle, getCache, globalEval, handler, hide, html, ignore_protocols, loader, log, loggers, now_state, oneprops, oneprops2, oneprops_obj, parentA, props, setData, setHrefs, setHtml, setTemplate, setXDR, stateOk, test, _busy, _checkExists, _clearRegCache, _compile, _del_listeners, _hide, _listeners, _loading,
+      var apply, busyTags, check_limit, check_queue, check_timeout, createRequestObject, displace, empty, empty2, firstCircle, getCache, globalEval, handler, hide, html, ignore_protocols, loader, log, loggers, now_state, oneprops, oneprops2, oneprops_obj, parentA, props, setData, setHrefs, setHtml, setTemplate, setXDR, stateOk, test, _busy, _checkExists, _clearRegCache, _compile, _del_listeners, _hide, _listeners, _loading,
         _this = this;
       this.options = options != null ? options : {};
       this.layers = [];
@@ -226,11 +226,6 @@
         _listeners[name] = [];
         return _del_listeners[name] = [];
       };
-      if (this.options.document) {
-        this.document = this.options.document;
-      } else if (typeof window !== "undefined" && window !== null) {
-        this.document = window.document;
-      }
       if (Object.keys(this.options).indexOf('loader') === -1) {
         this.options.loader = true;
       }
@@ -484,12 +479,12 @@
           return;
         }
         _this.load.cache.css[code] = true;
-        style = document.createElement("style");
+        style = _this.document.createElement("style");
         style.type = "text/css";
         if (style.styleSheet) {
           style.styleSheet.cssText = code;
         } else {
-          style.appendChild(document.createTextNode(code));
+          style.appendChild(_this.document.createTextNode(code));
         }
         head = _this.$('head');
         return head.insertBefore(style, head.lastChild);
@@ -566,7 +561,7 @@
       globalEval = function(data) {
         var head, script;
         head = _this.$('head');
-        script = document.createElement("script");
+        script = _this.document.createElement("script");
         script.type = "text/javascript";
         script.text = data;
         head.insertBefore(script, head.firstChild);
@@ -574,7 +569,7 @@
       };
       setXDR = function(path) {
         var head, script;
-        script = document.createElement("script");
+        script = _this.document.createElement("script");
         script.type = "text/javascript";
         head = _this.$('head');
         script.src = path;
@@ -714,15 +709,14 @@
         }, 1);
       });
       firstCircle = function(cb) {
-        var i, re;
+        var i;
         _this.check_status = 'run';
         _this.circle.cb = cb;
         if (_this.circle.state) {
           i = _this.circle.length;
           while (--i >= 0) {
             _this.layers[i].status = 'queue';
-            re = new RegExp(_this.layers[i].state, "im");
-            _this.layers[i].reg_state = _this.circle.state.match(re);
+            _this.layers[i].reg_state = _this.circle.state.match(new RegExp(_this.layers[i].state, "im"));
             _this.layers[i].node = null;
           }
           return _this.emit('circle');
@@ -910,7 +904,7 @@
         if (layer.ext && !layer._ext) {
           _this.log.debug("new external", layer.ext);
           return _this.load(layer.ext, function(err, data) {
-            var layers;
+            var eList, i, layers, len, num, param, prop, _ref, _ref1;
             layer._ext = {};
             if (!err) {
               try {
@@ -920,58 +914,56 @@
                   layer._ext = eval_(data);
                 }
                 layers = this.layers;
-                return this.compile(layer._ext, function() {
-                  var eList, i, len, num, param, prop, _ref, _ref1;
-                  layer._ext = this.layers;
-                  this.layers = layers;
-                  if (layer.config && layer._ext[0].config) {
-                    _ref = layer._ext[0].config;
-                    for (param in _ref) {
-                      if (!__hasProp.call(_ref, param)) continue;
-                      if (!layer.config[param]) {
-                        layer.config[param] = layer._ext[0].config[param];
-                      }
+                this.compile(layer._ext);
+                layer._ext = this.layers;
+                this.layers = layers;
+                if (layer.config && layer._ext[0].config) {
+                  _ref = layer._ext[0].config;
+                  for (param in _ref) {
+                    if (!__hasProp.call(_ref, param)) continue;
+                    if (!layer.config[param]) {
+                      layer.config[param] = layer._ext[0].config[param];
                     }
                   }
-                  _ref1 = layer._ext[0];
-                  for (prop in _ref1) {
-                    if (!__hasProp.call(_ref1, prop)) continue;
-                    if (!layer[prop]) {
-                      layer[prop] = layer._ext[0][prop];
-                    }
+                }
+                _ref1 = layer._ext[0];
+                for (prop in _ref1) {
+                  if (!__hasProp.call(_ref1, prop)) continue;
+                  if (!layer[prop]) {
+                    layer[prop] = layer._ext[0][prop];
                   }
-                  eList = ["onload", "oncheck", "onshow"];
-                  i = 0;
-                  len = eList.length;
+                }
+                eList = ["onload", "oncheck", "onshow"];
+                i = 0;
+                len = eList.length;
+                while (i < len) {
+                  (function(prop) {
+                    var value;
+                    value = layer["_" + prop];
+                    if (value) {
+                      return layer[prop] = function(cb) {
+                        try {
+                          return value.call(layer, cb);
+                        } catch (e) {
+                          this.log.error(prop + " " + e);
+                          return cb();
+                        }
+                      };
+                    }
+                  })(eList[i]);
+                  i++;
+                }
+                len = layer._ext.length;
+                if (len) {
+                  num = this.layers.indexOf(layer);
+                  i = 1;
                   while (i < len) {
-                    (function(prop) {
-                      var value;
-                      value = layer["_" + prop];
-                      if (value) {
-                        return layer[prop] = function(cb) {
-                          try {
-                            return value.call(layer, cb);
-                          } catch (e) {
-                            this.log.error(prop + " " + e);
-                            return cb();
-                          }
-                        };
-                      }
-                    })(eList[i]);
+                    num++;
+                    this.layers.splice(num, 0, layer._ext[i]);
                     i++;
                   }
-                  len = layer._ext.length;
-                  if (len) {
-                    num = this.layers.indexOf(layer);
-                    i = 1;
-                    while (i < len) {
-                      num++;
-                      this.layers.splice(num, 0, layer._ext[i]);
-                      i++;
-                    }
-                  }
-                  return cb();
-                });
+                }
+                return cb();
               } catch (e) {
                 this.log.error("wrong ext", layer.ext);
                 return cb();
@@ -1114,15 +1106,18 @@
       */
 
       busyTags = function(layer) {
-        var tag, _ref;
+        var find, tag, _ref;
         if (!layer.node) {
           layer.node = _this.$(layer.tag);
         }
         _ref = _this.circle.occupied;
         for (tag in _ref) {
           if (!__hasProp.call(_ref, tag)) continue;
-          if (layer.node && layer.node.length && layer.node.find(_this.circle.occupied[tag])) {
-            return true;
+          if (layer.node && layer.node.length) {
+            find = layer.node.find(_this.circle.occupied[tag]);
+            if (find && find.length !== 0) {
+              return true;
+            }
           }
         }
         return false;
@@ -1135,6 +1130,9 @@
         }
         return false;
       };
+      this.pasteHTML = function(tag, html) {
+        return _this.$(tag).innerHTML = html;
+      };
       _hide = function(layer) {
         var i;
         layer.status = "_hide";
@@ -1144,7 +1142,7 @@
             _hide(layer.childs[i]);
           }
         }
-        _this.$(layer.tag).innerHTML = '';
+        _this.pasteHTML(layer.tag, '');
         layer.show = false;
         return layer.status = 'hidden';
       };
@@ -1168,7 +1166,7 @@
               _results.push(_hide(_this.layers[i]));
             } else {
               find = _this.$(layer.tag).find(_this.layers[i].tag);
-              if (find && find.length) {
+              if (find && find.length !== 0) {
                 _results.push(_hide(_this.layers[i]));
               } else {
                 _results.push(void 0);
@@ -1211,7 +1209,7 @@
                         _this.circle.loading--;
                         return _this.emit('circle');
                       } else {
-                        _this.$(layer.tag).innerHTML = layer.htmlString;
+                        _this.pasteHTML(layer.tag, layer.htmlString);
                         layer.show = true;
                         return layer.onshow(function() {
                           _this.circle.loading--;
@@ -1378,8 +1376,10 @@
       if (!(this.options.cache != null)) {
         this.options.cache = false;
       }
+      empty2 = function() {};
       getCache = function() {
         var i, layer, _results;
+        Infra = window.Infra;
         _this.load.cache = Infra.server.cache;
         i = _this.layers.length;
         _results = [];
@@ -1393,9 +1393,9 @@
             if (!layer.htmlString && !layer.tplString && layer.tpl && _this.load.cache.text[layer.tpl]) {
               layer.tplString = _this.load.cache.text[layer.tpl];
             }
-            layer.reg_state = _this.state.match(new RegExp("^" + layer.state, "im"));
+            layer.reg_state = _this.state.match(new RegExp(layer.state, "im"));
             try {
-              _results.push(layer.onshow.bind(layer)(empty));
+              _results.push(layer.onshow.bind(layer)(empty2));
             } catch (e) {
               _results.push(_this.log.error("onshow() " + i + " " + e));
             }
@@ -1449,10 +1449,9 @@
       _checkExists = function(state, cb) {
         var exist, i;
         exist = void 0;
-        i = void 0;
         i = _this.layers.length;
         while (--i >= 0) {
-          exist = new RegExp("^" + _this.layers[i].state + "$").test(state);
+          exist = new RegExp(_this.layers[i].state).test(state);
           if (exist) {
             break;
           }
@@ -1461,9 +1460,8 @@
       };
       this.checkExists = function(state, cb) {
         if (!_this.layers.length) {
-          return _this.compile(_this.index, function() {
-            return _checkExists(state, cb);
-          });
+          _this.compile(_this.index);
+          return _checkExists(state, cb);
         } else {
           return _checkExists(state, cb);
         }
@@ -1488,62 +1486,56 @@
           return _cb();
         });
       };
-      if (!(this.options.title != null)) {
-        this.options.title = true;
-      }
       /*
-          @set.head = (headObj) =>
-            updateMeta = (metatags, attr, head) =>
-              update = false
-              cnt = undefined
-              cnt = 0
-              while cnt < metatags.length
-                name = metatags[cnt].getAttribute("name")
-                if name
-                  name = name.toLowerCase()
-                  if name is attr
-                    update = true
-                    metatags[cnt].setAttribute "content", @meta[attr]
-                cnt++
-              unless update # создаем новый
-                meta = document.createElement("meta")
-                meta.setAttribute "name", attr
-                meta.setAttribute "content", @meta[attr]
-                head.appendChild meta
-      
-            titleObj = headObj.title
-            metaObj = headObj.meta
-            not_found = titleObj["404"]
-            main = titleObj.main
-            sub = titleObj.sub
-            @on "start", =>
-              @meta = {}
-              @meta.keywords = metaObj.keywords
-              @meta.description = metaObj.description
-              @status_code = 200
-              @title = false
-      
-            @on "end", =>
-              unless @title # если до этого не определился вручную
-                if @status_code is 404
-                  @title = not_found
-                else if @state is "/"
-                  @title = main
-                else
-                  @title = @state.replace(/\/+$/, "").replace(/^\/+/, "").split("/").reverse().join(" / ") + sub
-                @last_status_code = @status_code
-              unless typeof (window) is "undefined" # на сервере title ставится из @title
-                document.title = @title
-                
-                # установить метатэги
-                metatags = document.getElementsByTagName("meta")
-                head = document.getElementsByTagName("head")[0]
-                @meta.keywords = ""  unless @meta.keywords
-                @meta.description = ""  unless @meta.description
-                updateMeta metatags, "keywords", head
-                updateMeta metatags, "description", head
+          if not @options.title? then @options.title = true
       */
 
+      this.head = function(headObj) {
+        _this.on("start", function() {
+          _this.meta = {};
+          _this.meta.keywords = headObj.meta.keywords;
+          _this.meta.description = headObj.meta.description;
+          _this.status_code = 200;
+          return _this.title = false;
+        });
+        return _this.on("end", function() {
+          var description, head, keywords, meta;
+          if (!_this.title) {
+            if (_this.status_code === 404) {
+              _this.title = headObj.title["404"];
+            } else if (_this.state === "/") {
+              _this.title = headObj.title.main;
+            } else {
+              _this.title = _this.state.replace(/\/+$/, "").replace(/^\/+/, "").split("/").reverse().join(" / ") + headObj.title.sub;
+            }
+            _this.last_status_code = _this.status_code;
+          }
+          _this.document.title = _this.title;
+          if (!_this.meta.keywords) {
+            _this.meta.keywords = "";
+          }
+          if (!_this.meta.description) {
+            _this.meta.description = "";
+          }
+          head = _this.$("head");
+          description = _this.$("meta[name=description]");
+          keywords = _this.$("meta[name=keywords]");
+          if (keywords && keywords.length !== 0) {
+            head.removeChild(keywords);
+          }
+          if (description && description.length !== 0) {
+            head.removeChild(description);
+          }
+          meta = _this.document.createElement("meta");
+          meta.setAttribute("name", 'description');
+          meta.setAttribute("content", _this.meta.description);
+          head.appendChild(meta);
+          meta = _this.document.createElement("meta");
+          meta.setAttribute("name", 'keywords');
+          meta.setAttribute("content", _this.meta.keywords);
+          return head.appendChild(meta);
+        });
+      };
       this.on("compile", function(layer, prop, value) {
         if (prop === "jsontpl") {
           return layer[prop] = value;
