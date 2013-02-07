@@ -716,7 +716,6 @@
           i = _this.circle.length;
           while (--i >= 0) {
             _this.layers[i].status = 'queue';
-            _this.layers[i].reg_state = _this.circle.state.match(new RegExp(_this.layers[i].state, "im"));
             _this.layers[i].node = null;
           }
           return _this.emit('circle');
@@ -1148,10 +1147,7 @@
       };
       hide = function(layer) {
         layer.status = "hide";
-        return _this.once('circle', function() {
-          _hide(layer);
-          return _this.emit('circle');
-        });
+        return _hide(layer);
       };
       displace = function(layer) {
         var find, i, _results;
@@ -1210,6 +1206,7 @@
                         return _this.emit('circle');
                       } else {
                         _this.pasteHTML(layer.tag, layer.htmlString);
+                        layer.last_state = _this.circle.state;
                         layer.show = true;
                         return layer.onshow(function() {
                           _this.circle.loading--;
@@ -1477,11 +1474,11 @@
             return cb();
           }
         };
-        _this.parsetpl(layer.tpl, layer, function(data) {
+        _this.tplParser(layer.tpl, layer, function(data) {
           layer.tpl = data;
           return _cb();
         });
-        return _this.parsetpl(layer.json, layer, function(data) {
+        return _this.tplParser(layer.json, layer, function(data) {
           layer.json = data;
           return _cb();
         });
@@ -1541,13 +1538,16 @@
           return layer[prop] = value;
         }
       });
-      this.once("start", function() {
+      this.on("start", function() {
         var i, _results;
         i = _this.layers.length;
         _results = [];
         while (--i >= 0) {
+          if (_this.state) {
+            _this.layers[i].reg_state = _this.state.match(new RegExp(_this.layers[i].state, "im"));
+          }
           if (_this.layers[i].jsontpl) {
-            _results.push(_this.layers[i].json = _this.parsetpl(_this.layers[i].jsontpl, _this.layers[i]));
+            _results.push(_this.layers[i].json = _this.tplParser(_this.layers[i].jsontpl, _this.layers[i]));
           } else {
             _results.push(void 0);
           }

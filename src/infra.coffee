@@ -510,7 +510,7 @@ class Infra
         i = @circle.length
         while --i >= 0
           @layers[i].status = 'queue' # статус обработки слоя
-          @layers[i].reg_state = @circle.state.match(new RegExp(@layers[i].state, "im"))
+          #@layers[i].reg_state = @circle.state.match(new RegExp(@layers[i].state, "im"))
           @layers[i].node = null
         @emit 'circle'
       else
@@ -818,9 +818,9 @@ class Infra
 
     hide = (layer) =>
       layer.status = "hide"
-      @once 'circle', => # пропустить круг
-        _hide layer
-        @emit 'circle'
+      #@once 'circle', => # пропустить круг
+      _hide layer
+      #@emit 'circle'
 
     # Скрыть слои которые замещает переданный слой, убрать их из цикла
     # Правила:
@@ -870,6 +870,7 @@ class Infra
                       @emit 'circle'
                     else
                       @pasteHTML(layer.tag, layer.htmlString)
+                      layer.last_state = @circle.state
                       layer.show = true
                       layer.onshow =>
                         @circle.loading--
@@ -1112,10 +1113,10 @@ class Infra
       counter = 2
       _cb = =>
         cb()  if --counter is 0
-      @parsetpl layer.tpl, layer, (data) =>
+      @tplParser layer.tpl, layer, (data) =>
         layer.tpl = data
         _cb()
-      @parsetpl layer.json, layer, (data) =>
+      @tplParser layer.json, layer, (data) =>
         layer.json = data
         _cb()
 
@@ -1161,10 +1162,11 @@ class Infra
     @on "compile", (layer, prop, value) =>
       layer[prop] = value if prop is "jsontpl"
 
-    @once "start", =>
+    @on "start", =>
       i = @layers.length
       while --i >= 0
-        @layers[i].json = @parsetpl(@layers[i].jsontpl, @layers[i]) if @layers[i].jsontpl
+        @layers[i].reg_state = @state.match(new RegExp(@layers[i].state, "im")) if @state
+        @layers[i].json = @tplParser(@layers[i].jsontpl, @layers[i]) if @layers[i].jsontpl
 
 if not window?
   module.exports = Infra

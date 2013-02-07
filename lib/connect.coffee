@@ -52,7 +52,7 @@ getInfraHtml = (options, state, req, cb) ->
     logger: options.logger
     loader: false
     index: options.layers_data
-    tplParser: options.parse
+    tplParser: options.tplParser
     document: document
     $: $
   infra.pasteHTML = pasteHTML
