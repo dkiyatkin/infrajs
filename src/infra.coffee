@@ -379,7 +379,7 @@ class Infra
 
     createRequestObject = () ->
       if XMLHttpRequest?
-        XMLHttpRequest()
+        return new XMLHttpRequest()
       else
         XMLHttpRequest2 = ->
           try

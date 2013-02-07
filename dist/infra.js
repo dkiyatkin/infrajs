@@ -538,7 +538,7 @@
       createRequestObject = function() {
         var XMLHttpRequest2;
         if (typeof XMLHttpRequest !== "undefined" && XMLHttpRequest !== null) {
-          return XMLHttpRequest();
+          return new XMLHttpRequest();
         } else {
           XMLHttpRequest2 = function() {
             try {
