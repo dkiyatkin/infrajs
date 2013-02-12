@@ -802,7 +802,38 @@ class Infra
       return false
 
     @pasteHTML = (tag, html) =>
-      @$(tag).innerHTML = html
+      el = @$(tag)
+      if /<(style+)([^>]+)*(?:>)/g.test(html) or /<(script+)([^>]+)*(?:>)/g.test(html)
+        @document.scriptautoexec = false
+        tempid = "infrahtml" + uniqueId() # Одинаковый id нельзя.. если будут вложенные вызовы будет ошибка
+        html = "<span id=\"" + tempid + "\" style=\"display:none\">" + "<style>#" + tempid + "{ width:3px }</style>" + "<script type=\"text/javascript\">document.scriptautoexec=true;</script>" + "1</span>" + html
+        try
+          el.innerHTML = html
+        catch e
+          el.innerHTML = "Ошибка вставки"
+        unless @document.scriptautoexec
+          scripts = el.getElementsByTagName("script")
+          i = 1
+          script = undefined
+          while script = scripts[i]
+            @load.script script
+            i++
+        bug = @document.getElementById(tempid)
+        if bug
+          b = getStyle(bug, "width")
+          if b isnt "3px"
+            _css = el.getElementsByTagName("style")
+            i = 0
+            css = undefined
+            while css = _css[i]
+              t = css.cssText #||css.innerHTML; для IE будет Undefined ну и бог с ним у него и так работает а сюда по ошибке поподаем
+              @load.styles t
+              i++
+          try
+            el.removeChild bug
+          catch e
+            @log.error "Ошибка при удалении временного элемента"
+      else el.innerHTML = html
 
     # скрыть слой и всех его потомков
     _hide = (layer) =>
@@ -852,6 +883,7 @@ class Infra
           @circle.loading++
           @external layer, =>
             layer.oncheck => # сработает у всех слоев которые должны быть показаны
+              layer.now_state = @circle.state
               layer.status = "insert"
               if layer.show
                 @circle.loading--
@@ -953,7 +985,6 @@ class Infra
       @on "end", => # Слои обработались
         setHrefs()
 
-
     if not @options.address_bar? then @options.address_bar = false
     # Включает управление адресной строкой
     if @options.address_bar
@@ -987,7 +1018,6 @@ class Infra
           history.replaceState null, null, @state
           location.href = @hash if @hash
         @hash = ""
-
 
     if not @options.cache? then @options.cache = false
     # Загружает кэш, вставленный на странице сервером.
@@ -1167,6 +1197,20 @@ class Infra
       while --i >= 0
         @layers[i].reg_state = @state.match(new RegExp(@layers[i].state, "im")) if @state
         @layers[i].json = @tplParser(@layers[i].jsontpl, @layers[i]) if @layers[i].jsontpl
+
+    # Получить у элемента значение css-свойства
+    getStyle = (el, cssprop) =>
+      if el.currentStyle #IE
+        el.currentStyle[cssprop]
+      else if @document.defaultView and @document.defaultView.getComputedStyle #Firefox
+        @document.defaultView.getComputedStyle(el, "")[cssprop]
+      else #try and get inline style
+        el.style[cssprop]
+
+  uniqueId = (length=8) ->
+    id = ""
+    id += Math.random().toString(36).substr(2) while id.length < length
+    id.substr 0, length
 
 if not window?
   module.exports = Infra

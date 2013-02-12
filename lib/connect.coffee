@@ -83,6 +83,7 @@ module.exports = (options) ->
               res.writeHead status_code,
                 "Content-Type": "text/html"
               res.end html
+              ###
           # проверка на последний слэш
           else unless state.slice(-1) is "/"
             state = state + "/"
@@ -91,12 +92,10 @@ module.exports = (options) ->
                 res.writeHead 301, # moved permanently
                   Location: req.originalUrl + "/"
                 res.end()
-              else
-                next()
-          else
-            next()
-      else
-        next()
+              else next()
+              ###
+          else next()
+      else next()
     catch e
       console.log e
       res.writeHead 301, # moved permanently

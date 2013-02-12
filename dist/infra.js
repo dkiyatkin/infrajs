@@ -22,9 +22,10 @@
     __hasProp = {}.hasOwnProperty;
 
   Infra = (function() {
+    var uniqueId;
 
     function Infra(options) {
-      var apply, busyTags, check_limit, check_queue, check_timeout, createRequestObject, displace, empty, empty2, firstCircle, getCache, globalEval, handler, hide, html, ignore_protocols, loader, log, loggers, now_state, oneprops, oneprops2, oneprops_obj, parentA, props, setData, setHrefs, setHtml, setTemplate, setXDR, stateOk, test, _busy, _checkExists, _clearRegCache, _compile, _del_listeners, _hide, _listeners, _loading,
+      var apply, busyTags, check_limit, check_queue, check_timeout, createRequestObject, displace, empty, empty2, firstCircle, getCache, getStyle, globalEval, handler, hide, html, ignore_protocols, loader, log, loggers, now_state, oneprops, oneprops2, oneprops_obj, parentA, props, setData, setHrefs, setHtml, setTemplate, setXDR, stateOk, test, _busy, _checkExists, _clearRegCache, _compile, _del_listeners, _hide, _listeners, _loading,
         _this = this;
       this.options = options != null ? options : {};
       this.layers = [];
@@ -1130,7 +1131,48 @@
         return false;
       };
       this.pasteHTML = function(tag, html) {
-        return _this.$(tag).innerHTML = html;
+        var b, bug, css, el, i, script, scripts, t, tempid, _css;
+        el = _this.$(tag);
+        if (/<(style+)([^>]+)*(?:>)/g.test(html) || /<(script+)([^>]+)*(?:>)/g.test(html)) {
+          _this.document.scriptautoexec = false;
+          tempid = "infrahtml" + uniqueId();
+          html = "<span id=\"" + tempid + "\" style=\"display:none\">" + "<style>#" + tempid + "{ width:3px }</style>" + "<script type=\"text/javascript\">document.scriptautoexec=true;</script>" + "1</span>" + html;
+          try {
+            el.innerHTML = html;
+          } catch (e) {
+            el.innerHTML = "Ошибка вставки";
+          }
+          if (!_this.document.scriptautoexec) {
+            scripts = el.getElementsByTagName("script");
+            i = 1;
+            script = void 0;
+            while (script = scripts[i]) {
+              _this.load.script(script);
+              i++;
+            }
+          }
+          bug = _this.document.getElementById(tempid);
+          if (bug) {
+            b = getStyle(bug, "width");
+            if (b !== "3px") {
+              _css = el.getElementsByTagName("style");
+              i = 0;
+              css = void 0;
+              while (css = _css[i]) {
+                t = css.cssText;
+                _this.load.styles(t);
+                i++;
+              }
+            }
+            try {
+              return el.removeChild(bug);
+            } catch (e) {
+              return _this.log.error("Ошибка при удалении временного элемента");
+            }
+          }
+        } else {
+          return el.innerHTML = html;
+        }
       };
       _hide = function(layer) {
         var i;
@@ -1188,6 +1230,7 @@
             _this.circle.loading++;
             return _this.external(layer, function() {
               return layer.oncheck(function() {
+                layer.now_state = _this.circle.state;
                 layer.status = "insert";
                 if (layer.show) {
                   _this.circle.loading--;
@@ -1554,7 +1597,28 @@
         }
         return _results;
       });
+      getStyle = function(el, cssprop) {
+        if (el.currentStyle) {
+          return el.currentStyle[cssprop];
+        } else if (_this.document.defaultView && _this.document.defaultView.getComputedStyle) {
+          return _this.document.defaultView.getComputedStyle(el, "")[cssprop];
+        } else {
+          return el.style[cssprop];
+        }
+      };
     }
+
+    uniqueId = function(length) {
+      var id;
+      if (length == null) {
+        length = 8;
+      }
+      id = "";
+      while (id.length < length) {
+        id += Math.random().toString(36).substr(2);
+      }
+      return id.substr(0, length);
+    };
 
     return Infra;
 
